@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>psimpy.simulator.mass_point_model &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API &amp; Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">psimpy.simulator.mass_point_model</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for psimpy.simulator.mass_point_model</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">linecache</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.integrate</span> <span class="kn">import</span> <span class="n">ode</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">RegularGridInterpolator</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">beartype</span> <span class="kn">import</span> <span class="n">beartype</span>
+
+<div class="viewcode-block" id="MassPointModel">
+<a class="viewcode-back" href="../../../simulator/mass_point_model.html#psimpy.simulator.mass_point_model.MassPointModel">[docs]</a>
+<span class="k">class</span> <span class="nc">MassPointModel</span><span class="p">:</span>
+
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simulate the movement of a masspoint on a topography.&quot;&quot;&quot;</span>
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_preprocess</span><span class="p">(</span><span class="n">elevation</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Preprocess input data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        elevation : str</span>
+<span class="sd">            Name of the elevation raster file, in ESRI ascii format, including</span>
+<span class="sd">            the path.</span>
+<span class="sd">        x0 : float or int</span>
+<span class="sd">            x coordinate of initial position.</span>
+<span class="sd">        y0 : float or int</span>
+<span class="sd">            y coordinate of initial position.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        fgrad_x : Callable</span>
+<span class="sd">            Call with :code:`fgrad_x(x, y)`. Return first order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `x` at location</span>
+<span class="sd">            `(x, y)`.</span>
+<span class="sd">        fgrad_y : callable</span>
+<span class="sd">            Call with :code:`fgrad_y(x, y)`. Return first order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `y` at location</span>
+<span class="sd">            `(x, y)`.</span>
+<span class="sd">        fgrad_xx : Callable</span>
+<span class="sd">            Call with :code:`fgrad_xx(x, y)`. Return second order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `x` at location `(x, y)`.</span>
+<span class="sd">        fgrad_yy : Callable</span>
+<span class="sd">            Call with :code:`fgrad_yy(x, y)`. Return second order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `y` at location `(x, y)`.</span>
+<span class="sd">        fgrad_xy : Callable</span>
+<span class="sd">            Call with :code:`fgrad_xy(x ,y)`. Return second order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `x` and `y` at location</span>
+<span class="sd">            `(x, y)`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>        
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">elevation</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elevation</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">linecache</span><span class="o">.</span><span class="n">getline</span><span class="p">(</span><span class="n">elevation</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">6</span><span class="p">)]</span>
+        <span class="n">header_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">header</span><span class="p">]</span>
+        <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span><span class="p">,</span> <span class="n">xll</span><span class="p">,</span> <span class="n">yll</span><span class="p">,</span> <span class="n">cellsize</span> <span class="o">=</span> <span class="n">header_values</span>
+        <span class="n">ncols</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncols</span><span class="p">)</span>
+        <span class="n">nrows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nrows</span><span class="p">)</span>
+
+        <span class="n">x_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">xll</span><span class="p">,</span> <span class="n">xll</span><span class="o">+</span><span class="p">(</span><span class="n">cellsize</span><span class="o">*</span><span class="n">ncols</span><span class="p">),</span> <span class="n">cellsize</span><span class="p">)</span>
+        <span class="n">y_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">yll</span><span class="p">,</span> <span class="n">yll</span><span class="o">+</span><span class="p">(</span><span class="n">cellsize</span><span class="o">*</span><span class="n">nrows</span><span class="p">),</span> <span class="n">cellsize</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">([</span><span class="n">x0</span><span class="o">&gt;</span><span class="n">x_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">x0</span><span class="o">&lt;</span><span class="n">x_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">y0</span><span class="o">&gt;</span><span class="n">y_values</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">y0</span><span class="o">&lt;</span><span class="n">y_values</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]]):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;x0 and y0 must be within the boundary of elevation&quot;</span><span class="p">)</span>
+        
+        <span class="n">z_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">elevation</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">z_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">z_values</span><span class="p">))</span>
+        
+        <span class="n">dzdx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">z_values</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">dzdy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">z_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="n">dzdxx</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">dzdx</span><span class="p">,</span> <span class="n">x_values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">dzdyy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">dzdy</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">dzdxy</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">gradient</span><span class="p">(</span><span class="n">dzdx</span><span class="p">,</span> <span class="n">y_values</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+        
+        <span class="n">fgrad_x</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">),</span> <span class="n">dzdx</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">fgrad_y</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">),</span> <span class="n">dzdy</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">fgrad_xx</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">),</span> <span class="n">dzdxx</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">fgrad_yy</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">),</span> <span class="n">dzdyy</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+        <span class="n">fgrad_xy</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">x_values</span><span class="p">,</span> <span class="n">y_values</span><span class="p">),</span> <span class="n">dzdxy</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">fgrad_x</span><span class="p">,</span> <span class="n">fgrad_y</span><span class="p">,</span> <span class="n">fgrad_xx</span><span class="p">,</span> <span class="n">fgrad_yy</span><span class="p">,</span> <span class="n">fgrad_xy</span>
+
+    
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_mass_point_model</span><span class="p">(</span>
+        <span class="n">t</span><span class="p">,</span> <span class="n">alpha</span><span class="p">,</span> <span class="n">coulomb_friction</span><span class="p">,</span> <span class="n">turbulent_friction</span><span class="p">,</span> <span class="n">fgrad_x</span><span class="p">,</span> <span class="n">fgrad_y</span><span class="p">,</span>
+        <span class="n">fgrad_xx</span><span class="p">,</span> <span class="n">fgrad_yy</span><span class="p">,</span> <span class="n">fgrad_xy</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">curvature</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Define mass point model (3d) which serves as the callable function</span>
+<span class="sd">        :code:`f(t,alpha,*f_args)` in :class:`scipy.integrate.ode(f)`.</span>
+
+<span class="sd">        Parameters:</span>
+<span class="sd">        -----------</span>
+<span class="sd">        t : float or int</span>
+<span class="sd">            Time in seconds.</span>
+<span class="sd">        alpha : list</span>
+<span class="sd">            Contains `x`, `y`, `ux`, `uy` at time `t`, i.e.,</span>
+<span class="sd">            `[x(t), y(t), ux(t), uy(t)]`.</span>
+<span class="sd">        coulomb_friction : float</span>
+<span class="sd">            Dry Coulomb friction coefficient.</span>
+<span class="sd">        turbulent_friction : float or int</span>
+<span class="sd">            Turbulent friction coefficient, in :math:`m/s^2`.</span>
+<span class="sd">        fgrad_x : Callable</span>
+<span class="sd">            Call with :code:`fgrad_x(x, y)`. Return first order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `x` at location `(x, y)`.</span>
+<span class="sd">        fgrad_y : Callable</span>
+<span class="sd">            Call with :code:`fgrad_y(x, y)`. Return first order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `y` at location `(x, y)`.</span>
+<span class="sd">        fgrad_xx : Callable</span>
+<span class="sd">            Call with :code:`fgrad_xx(x, y)`. Return second order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `x` at location `(x, y)`.</span>
+<span class="sd">        fgrad_yy : Callable</span>
+<span class="sd">            Call with :code:`fgrad_yy(x, y)`. Return second order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `y` at location `(x, y)`.</span>
+<span class="sd">        fgrad_xy : Callable</span>
+<span class="sd">            Call with :code:`fgrad_xy(x ,y)`. Return second order partial</span>
+<span class="sd">            derivative of ``elevation`` with respect to `x` and `y` at location</span>
+<span class="sd">            `(x, y)`.</span>
+<span class="sd">        g : float or int</span>
+<span class="sd">            Gravity acceleration, in :math:`m/s^2`.</span>
+<span class="sd">        curvature : bool</span>
+<span class="sd">            If `True`, take the curvature effect into account.</span>
+<span class="sd">        </span>
+<span class="sd">        Return:</span>
+<span class="sd">        -------</span>
+<span class="sd">        dalphadt : numpy array </span>
+<span class="sd">            Right hand side of the mass point model.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">ux</span><span class="p">,</span> <span class="n">uy</span> <span class="o">=</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="n">alpha</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span>
+
+        <span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">])</span>  
+        <span class="n">gradx</span> <span class="o">=</span> <span class="n">fgrad_x</span><span class="p">(</span><span class="n">point</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">grady</span> <span class="o">=</span> <span class="n">fgrad_y</span><span class="p">(</span><span class="n">point</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">gradxx</span> <span class="o">=</span> <span class="n">fgrad_xx</span><span class="p">(</span><span class="n">point</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">gradyy</span> <span class="o">=</span> <span class="n">fgrad_yy</span><span class="p">(</span><span class="n">point</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">gradxy</span> <span class="o">=</span> <span class="n">fgrad_xy</span><span class="p">(</span><span class="n">point</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">sqrt_x</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">gradx</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">sqrt_y</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+        <span class="n">sqrt_xy</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">gradx</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="n">gx</span> <span class="o">=</span> <span class="n">gradx</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">g</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt_x</span>
+        <span class="n">gy</span> <span class="o">=</span> <span class="n">grady</span> <span class="o">*</span> <span class="p">(</span><span class="o">-</span><span class="n">g</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt_y</span>
+        <span class="n">gn</span> <span class="o">=</span> <span class="n">g</span> <span class="o">/</span> <span class="n">sqrt_xy</span>
+
+        <span class="k">if</span> <span class="n">curvature</span><span class="p">:</span>
+            <span class="n">kx</span> <span class="o">=</span> <span class="n">gradxx</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">gradx</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt_xy</span>
+            <span class="n">kxy</span> <span class="o">=</span> <span class="n">gradxy</span> <span class="o">/</span> <span class="n">sqrt_x</span> <span class="o">/</span> <span class="n">sqrt_y</span> <span class="o">/</span> <span class="n">sqrt_xy</span>
+            <span class="n">ky</span> <span class="o">=</span> <span class="n">gradyy</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">/</span> <span class="n">sqrt_xy</span>
+            <span class="n">uku</span> <span class="o">=</span> <span class="n">kx</span><span class="o">*</span><span class="n">ux</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">kxy</span><span class="o">*</span><span class="n">ux</span><span class="o">*</span><span class="n">uy</span> <span class="o">+</span> <span class="n">ky</span><span class="o">*</span><span class="n">uy</span><span class="o">**</span><span class="mi">2</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">uku</span> <span class="o">=</span> <span class="mi">0</span>
+        
+        <span class="n">u</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ux</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">uy</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">ux</span><span class="o">*</span><span class="n">uy</span><span class="o">*</span><span class="n">gradx</span><span class="o">*</span><span class="n">grady</span><span class="o">/</span><span class="n">sqrt_x</span><span class="o">/</span><span class="n">sqrt_y</span><span class="p">)</span>
+        
+        <span class="n">dalphadt</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">))</span>
+
+        <span class="n">dalphadt</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="n">ux</span> <span class="o">/</span> <span class="n">sqrt_x</span>
+        <span class="n">dalphadt</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">uy</span> <span class="o">/</span> <span class="n">sqrt_y</span>
+
+        <span class="k">if</span> <span class="n">u</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">friction</span> <span class="o">=</span> <span class="n">coulomb_friction</span><span class="o">*</span><span class="p">(</span><span class="n">gn</span><span class="o">+</span><span class="n">uku</span><span class="p">)</span> <span class="o">+</span> <span class="n">g</span><span class="o">*</span><span class="n">u</span><span class="o">**</span><span class="mi">2</span><span class="o">/</span><span class="n">turbulent_friction</span>
+            <span class="n">dalphadt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">gx</span> <span class="o">-</span> <span class="p">(</span><span class="n">ux</span><span class="o">/</span><span class="n">u</span><span class="p">)</span><span class="o">*</span><span class="n">friction</span>
+            <span class="n">dalphadt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">gy</span> <span class="o">-</span> <span class="p">(</span><span class="n">uy</span><span class="o">/</span><span class="n">u</span><span class="p">)</span><span class="o">*</span><span class="n">friction</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">friction</span> <span class="o">=</span> <span class="n">coulomb_friction</span><span class="o">*</span><span class="n">gn</span>
+            <span class="n">dalphadt</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">gx</span> <span class="o">+</span> <span class="n">friction</span><span class="o">*</span><span class="n">gradx</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">gradx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">sqrt_x</span><span class="o">/</span>   \
+                <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gradx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">gradx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+            <span class="n">dalphadt</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">gy</span> <span class="o">+</span> <span class="n">friction</span><span class="o">*</span><span class="n">grady</span><span class="o">*</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">gradx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">sqrt_y</span><span class="o">/</span>   \
+                <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">gradx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="p">(</span><span class="n">gradx</span><span class="o">**</span><span class="mi">2</span><span class="o">+</span><span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">dalphadt</span>
+
+<div class="viewcode-block" id="MassPointModel.run">
+<a class="viewcode-back" href="../../../simulator/mass_point_model.html#psimpy.simulator.mass_point_model.MassPointModel.run">[docs]</a>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">elevation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">coulomb_friction</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">turbulent_friction</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">x0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span>
+        <span class="n">y0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">],</span> <span class="n">ux0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">uy0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">dt</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">tend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span> <span class="n">t0</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span>
+        <span class="n">g</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mf">9.8</span><span class="p">,</span> <span class="n">atol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span> <span class="n">rtol</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-6</span><span class="p">,</span>
+        <span class="n">curvature</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Solve the mass point model using :class:`scipy.integrate.ode` solver</span>
+<span class="sd">        given required input data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        elevation : str</span>
+<span class="sd">            Name of the elevation raster file, in ESRI ascii format, including</span>
+<span class="sd">            the path.</span>
+<span class="sd">        coulomb_friction : float</span>
+<span class="sd">            Dry Coulomb friction coefficient.</span>
+<span class="sd">        turbulent_friction : float or int</span>
+<span class="sd">            Turbulent friction coefficient, in :math:`m/s^2`.</span>
+<span class="sd">        x0 : float or int</span>
+<span class="sd">            `x` coordinate of initial position.</span>
+<span class="sd">        y0 : float or int</span>
+<span class="sd">            `y` coordinate of initial position.</span>
+<span class="sd">        ux0 : float or int</span>
+<span class="sd">            Initial velocity in `x` direction.</span>
+<span class="sd">        uy0 : float or int</span>
+<span class="sd">            Initial velocity in `y` direction.</span>
+<span class="sd">        dt : float or int</span>
+<span class="sd">            Time step in seconds.</span>
+<span class="sd">        tend : float or int</span>
+<span class="sd">            End time in seconds.</span>
+<span class="sd">        t0 : float or int</span>
+<span class="sd">            Initial time.</span>
+<span class="sd">        g : float or int</span>
+<span class="sd">            Gravity acceleration, in :math:`m/s^2`.</span>
+<span class="sd">        atol : float</span>
+<span class="sd">            Absolute tolerance for solution.</span>
+<span class="sd">        rtol : float</span>
+<span class="sd">            Relative tolerance for solution.</span>
+<span class="sd">        curvature : bool</span>
+<span class="sd">            If `True`, take the curvature effect into account.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        output: numpy array</span>
+<span class="sd">            Time history of the mass point&#39;s location and velocity.</span>
+<span class="sd">            2d :class:`numpy.ndarray`. Each row corresponds to a time step and</span>
+<span class="sd">            each column corresponds to a quantity. In total :math:`6` columns,</span>
+<span class="sd">            namely :code:`output.shape[1]=6`. More specifically:</span>
+<span class="sd">            :code:`output[:,0]` are the time steps,</span>
+<span class="sd">            :code:`output[:,1]` are the `x` coordinates,</span>
+<span class="sd">            :code:`output[:,2]` are the `y` coordinates,</span>
+<span class="sd">            :code:`output[:,3]` are velocity values in `x` direction,</span>
+<span class="sd">            :code:`output[:,4]` are velocity values in `y` direction,</span>
+<span class="sd">            :code:`output[:,5]` are total velocity values.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">fgrad_x</span><span class="p">,</span> <span class="n">fgrad_y</span><span class="p">,</span> <span class="n">fgrad_xx</span><span class="p">,</span> <span class="n">fgrad_yy</span><span class="p">,</span> <span class="n">fgrad_xy</span> <span class="o">=</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess</span><span class="p">(</span><span class="n">elevation</span><span class="p">,</span> <span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">)</span>
+        
+        <span class="n">s</span> <span class="o">=</span> <span class="n">ode</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_mass_point_model</span><span class="p">)</span><span class="o">.</span><span class="n">set_integrator</span><span class="p">(</span><span class="s1">&#39;dopri5&#39;</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="s1">&#39;bdf&#39;</span><span class="p">,</span>
+            <span class="n">atol</span><span class="o">=</span><span class="n">atol</span><span class="p">,</span> <span class="n">rtol</span><span class="o">=</span><span class="n">rtol</span><span class="p">)</span>
+        
+        <span class="n">s</span><span class="o">.</span><span class="n">set_f_params</span><span class="p">(</span><span class="n">coulomb_friction</span><span class="p">,</span> <span class="n">turbulent_friction</span><span class="p">,</span> <span class="n">fgrad_x</span><span class="p">,</span> <span class="n">fgrad_y</span><span class="p">,</span>
+            <span class="n">fgrad_xx</span><span class="p">,</span><span class="n">fgrad_yy</span><span class="p">,</span><span class="n">fgrad_xy</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">curvature</span><span class="p">)</span>
+        
+        <span class="n">alpha0</span> <span class="o">=</span> <span class="p">[</span><span class="n">x0</span><span class="p">,</span> <span class="n">y0</span><span class="p">,</span> <span class="n">ux0</span><span class="p">,</span> <span class="n">uy0</span><span class="p">]</span>
+        <span class="n">s</span><span class="o">.</span><span class="n">set_initial_value</span><span class="p">(</span><span class="n">alpha0</span><span class="p">,</span> <span class="n">t0</span><span class="p">)</span>
+
+        <span class="n">t_all</span> <span class="o">=</span> <span class="p">[</span><span class="n">t0</span><span class="p">]</span>
+        <span class="n">alpha_all</span> <span class="o">=</span> <span class="p">[</span><span class="n">alpha0</span><span class="p">]</span>
+
+        <span class="k">while</span> <span class="n">s</span><span class="o">.</span><span class="n">successful</span><span class="p">()</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">t</span> <span class="o">&lt;</span> <span class="n">tend</span><span class="p">:</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">integrate</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">t</span> <span class="o">+</span> <span class="n">dt</span><span class="p">)</span>
+            <span class="n">t_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
+            <span class="n">alpha_all</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">y</span><span class="p">)</span>
+        
+        <span class="n">t_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">t_all</span><span class="p">)</span>
+        <span class="n">alpha_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">alpha_all</span><span class="p">)</span>
+
+        <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_all</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_all</span><span class="p">)):</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">alpha_all</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">alpha_all</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+            <span class="n">gradx</span> <span class="o">=</span> <span class="n">fgrad_x</span><span class="p">(</span><span class="n">point</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">grady</span> <span class="o">=</span> <span class="n">fgrad_y</span><span class="p">(</span><span class="n">point</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">ux</span> <span class="o">=</span> <span class="n">alpha_all</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">2</span><span class="p">]</span>
+            <span class="n">uy</span> <span class="o">=</span> <span class="n">alpha_all</span><span class="p">[</span><span class="n">i</span><span class="p">,</span><span class="mi">3</span><span class="p">]</span>
+            <span class="n">u</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">ux</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="n">uy</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">ux</span><span class="o">*</span><span class="n">uy</span><span class="o">*</span><span class="n">gradx</span><span class="o">*</span><span class="n">grady</span><span class="o">/</span>
+                <span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">gradx</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">/</span><span class="n">math</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="mi">1</span><span class="o">+</span><span class="n">grady</span><span class="o">**</span><span class="mi">2</span><span class="p">))</span>
+            
+        <span class="n">t_all</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">t_all</span><span class="p">,(</span><span class="nb">len</span><span class="p">(</span><span class="n">t_all</span><span class="p">),</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">u</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">u</span><span class="p">,(</span><span class="nb">len</span><span class="p">(</span><span class="n">u</span><span class="p">),</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">t_all</span><span class="p">,</span> <span class="n">alpha_all</span><span class="p">,</span> <span class="n">u</span><span class="p">),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">output</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

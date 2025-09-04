@@ -1,0 +1,16 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_sampler_sg_execution_times:
+
+Computation times
+=================
+**00:05.310** total execution time for **auto_examples_sampler** files:
+
++-----------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_sampler_plot_metropolis_hastings.py` (``plot_metropolis_hastings.py``) | 00:04.704 | 0.0 MB |
++-----------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_sampler_plot_saltelli.py` (``plot_saltelli.py``)                       | 00:00.355 | 0.0 MB |
++-----------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_sampler_plot_latin.py` (``plot_latin.py``)                             | 00:00.251 | 0.0 MB |
++-----------------------------------------------------------------------------------------------------+-----------+--------+

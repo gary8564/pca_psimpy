@@ -1,0 +1,366 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sobol’ analysis &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Simulator" href="../simulator/index.html" />
+    <link rel="prev" title="Sensitivity" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API &amp; Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Example Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../emulator/index.html">Emulator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inference/index.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sampler/index.html">Sampler</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Sensitivity</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#">Sobol’ analysis</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../simulator/index.html">Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Example Gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Sensitivity</a></li>
+      <li class="breadcrumb-item active">Sobol’ analysis</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/sensitivity/plot_sobol_analyze.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-sensitivity-plot-sobol-analyze-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="sobol-analysis">
+<span id="sphx-glr-auto-examples-sensitivity-plot-sobol-analyze-py"></span><h1>Sobol’ analysis<a class="headerlink" href="#sobol-analysis" title="Link to this heading"></a></h1>
+<p>This example shows how to compute Sobol’ sensitivity indices using
+the <a class="reference internal" href="../../sensitivity/sobol.html#psimpy.sensitivity.sobol.SobolAnalyze" title="psimpy.sensitivity.sobol.SobolAnalyze"><code class="xref py py-class docutils literal notranslate"><span class="pre">SobolAnalyze</span></code></a> class.</p>
+<p>Let us consider the Ishigami function <span id="id1">[<a class="reference internal" href="../../refs.html#id9" title="Loic Le Gratiet, Claire Cannamela, and Bertrand Iooss. A Bayesian approach for global sensitivity analysis of (multifidelity) computer codes. SIAM/ASA Journal on Uncertainty Quantification, 2(1):336–363, 2014. doi:10.1137/130926869.">Le Gratiet <em>et al.</em>, 2014</a>]</span></p>
+<p><span class="math notranslate nohighlight">\(y=f\left(x_1, x_2, x_3\right)=\sin \left(x_1\right)+7 \sin \left(\mathrm{x}_2\right)^2+0.1 x_3^4 \sin \left(x_1\right)\)</span></p>
+<p>where <span class="math notranslate nohighlight">\(x_i\)</span> is uniformly distributed on <span class="math notranslate nohighlight">\([-\pi, \pi]\)</span> for <span class="math notranslate nohighlight">\(i \in [1,2,3]\)</span>. We define the function as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">x3</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">x3</span><span class="o">**</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The variation of each <span class="math notranslate nohighlight">\(x_i\)</span> leads to the variation of <span class="math notranslate nohighlight">\(y\)</span>. Sobol’ analysis is used to quantify the contribution
+of each <span class="math notranslate nohighlight">\(x_i\)</span> and their interactions to the variation of <span class="math notranslate nohighlight">\(y\)</span>. Steps of a Sobol’ analysis are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Draw samples of input.</p></li>
+<li><p>Evaluate the model at each input sample to obtain model output.</p></li>
+<li><p>Compute Sobol’ indices based on model outputs.</p></li>
+</ol>
+</div></blockquote>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.sampler</span> <span class="kn">import</span> <span class="n">Saltelli</span>
+<span class="kn">from</span> <span class="nn">psimpy.sensitivity</span> <span class="kn">import</span> <span class="n">SobolAnalyze</span>
+
+<span class="n">ndim</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">]])</span>
+<span class="n">calc_second_order</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">nbase</span> <span class="o">=</span> <span class="mi">1024</span>
+
+<span class="c1"># draw Saltelli samples</span>
+<span class="n">saltelli_sampler</span> <span class="o">=</span> <span class="n">Saltelli</span><span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">calc_second_order</span><span class="p">)</span>
+<span class="n">saltelli_samples</span> <span class="o">=</span> <span class="n">saltelli_sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">nbase</span><span class="p">)</span>
+
+<span class="c1"># Evaluate the model to obtain model outputs</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">saltelli_samples</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">saltelli_samples</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">saltelli_samples</span><span class="p">[:,</span> <span class="mi">2</span><span class="p">])</span>
+
+<span class="c1"># Compute Sobol&#39; indices</span>
+<span class="n">sobol_analyzer</span> <span class="o">=</span> <span class="n">SobolAnalyze</span><span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">calc_second_order</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+<span class="n">S_res</span> <span class="o">=</span> <span class="n">sobol_analyzer</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Estimated first-order Sobol&#39; index: &quot;</span><span class="p">,</span> <span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Analytical solution: [0.314, 0.442, 0]&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>Estimated first-order Sobol&#39; index:  [0.31430871 0.44545644 0.01325799]
+Analytical solution: [0.314, 0.442, 0]
+</pre></div>
+</div>
+<p>Figure below shows the results. The bar plots represent estimated first-order
+and total-effect Sobol’ indices, as well as their 95% confidence interval. The
+red stars represent true values of the first-order Sobol’ indices.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">name_vars</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$x_1$&#39;</span><span class="p">,</span><span class="sa">r</span><span class="s1">&#39;$x_2$&#39;</span><span class="p">,</span><span class="sa">r</span><span class="s1">&#39;$x_3$&#39;</span><span class="p">]</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;S1&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span> <span class="s1">&#39;ST&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
+<span class="n">color</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;S1&#39;</span><span class="p">:</span><span class="s1">&#39;#69b3a2&#39;</span><span class="p">,</span> <span class="s1">&#39;ST&#39;</span><span class="p">:</span><span class="s1">&#39;#3399e6&#39;</span><span class="p">}</span>
+<span class="n">width</span><span class="o">=</span><span class="mf">0.8</span>
+<span class="n">capsize</span><span class="o">=</span><span class="mi">3</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="c1"># estimated first-order Sobol&#39; indices and their confidence interval</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">],</span> <span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">][:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">],</span> <span class="n">capsize</span><span class="o">=</span><span class="n">capsize</span><span class="p">)</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.7</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span><span class="mf">4.5</span><span class="p">,</span><span class="mf">7.5</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">name_vars</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span><span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">labelcolor</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.25</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;First-order index&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">])</span>
+
+<span class="c1"># analytical solution for first-order indices</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.314</span><span class="p">,</span> <span class="mf">0.442</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+
+
+<span class="c1"># estimated total-effect Sobol&#39; indices and their confidence interval</span>
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">],</span> <span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">][:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">],</span> <span class="n">capsize</span><span class="o">=</span><span class="n">capsize</span><span class="p">)</span>
+
+<span class="n">ax2</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.7</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span><span class="mf">4.5</span><span class="p">,</span><span class="mf">7.5</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span><span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">labelcolor</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.25</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Total-effect index&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_sobol_analyze_001.png" srcset="../../_images/sphx_glr_plot_sobol_analyze_001.png" alt="plot sobol analyze" class = "sphx-glr-single-img"/><div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>The interaction between one parameter and all other parameters can be
+quantified by the difference between its first-order and total-effet Sobol’
+indices. If detailed information on interaction between any two parameters
+is needed, one can set <code class="docutils literal notranslate"><span class="pre">calc_second_order</span></code> to <cite>True</cite>.</p>
+</div>
+<p><strong>Many models of interest in real-world applications are very computationally
+expensive. In that case, we resort to emulation techniques in order to efficiently
+conduct Sobol’ analysis.</strong> See <span id="id2">Zhao <em>et al.</em> [<a class="reference internal" href="../../refs.html#id14" title="H. Zhao, F. Amann, and J. Kowalski. Emulator-based global sensitivity analysis for flow-like landslide run-out models. Landslides, ():, 2021. doi:https://doi.org/10.1007/s10346-021-01690-w.">2021</a>]</span> for the detailed theory.</p>
+<p>Steps of such an analysis are:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Draw input samples for emulator training.</p></li>
+<li><p>Evaluate the model at each training input point to obtain training data.</p></li>
+<li><p>Train an emulator for the computationally expensive model of interest.</p></li>
+<li><p>Draw samples of input for Sobol’ analysis.</p></li>
+<li><p>Evaluate the emulator at each input sample at step 3 to obtain approximated model outputs.</p></li>
+<li><p>Compute Sobol’ indices based on approximated model outputs.</p></li>
+</ol>
+</div></blockquote>
+<p>Assume that the above Ishigami function is computationally expensive, an emulator-based
+Sobol’ analysis can be conducted as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">psimpy.sampler</span> <span class="kn">import</span> <span class="n">LHS</span>
+<span class="kn">from</span> <span class="nn">psimpy.emulator</span> <span class="kn">import</span> <span class="n">ScalarGaSP</span>
+<span class="kn">from</span> <span class="nn">psimpy.sampler</span> <span class="kn">import</span> <span class="n">Saltelli</span>
+<span class="kn">from</span> <span class="nn">psimpy.sensitivity</span> <span class="kn">import</span> <span class="n">SobolAnalyze</span>
+
+<span class="c1"># define the model</span>
+<span class="k">def</span> <span class="nf">f</span><span class="p">(</span><span class="n">x1</span><span class="p">,</span><span class="n">x2</span><span class="p">,</span><span class="n">x3</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">7</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x2</span><span class="p">)</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mf">0.1</span><span class="o">*</span><span class="n">x3</span><span class="o">**</span><span class="mi">4</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">sin</span><span class="p">(</span><span class="n">x1</span><span class="p">)</span>
+
+<span class="n">ndim</span> <span class="o">=</span> <span class="mi">3</span>
+<span class="n">bounds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">],</span> <span class="p">[</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">]])</span>
+<span class="n">seed</span> <span class="o">=</span> <span class="mi">2</span>
+
+<span class="c1"># draw 100 input samples for emulator training using Latin hypercube sampling</span>
+<span class="n">lhs_sampler</span> <span class="o">=</span> <span class="n">LHS</span><span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">seed</span><span class="p">,</span> <span class="n">criterion</span><span class="o">=</span><span class="s1">&#39;maximin&#39;</span><span class="p">,</span> <span class="n">iteration</span><span class="o">=</span><span class="mi">200</span><span class="p">)</span>
+<span class="n">design</span> <span class="o">=</span> <span class="n">lhs_sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">nsamples</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span>
+
+<span class="c1"># evaluate the model at each training input point</span>
+<span class="n">response</span> <span class="o">=</span> <span class="n">f</span><span class="p">(</span><span class="n">design</span><span class="p">[:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">design</span><span class="p">[:,</span><span class="mi">1</span><span class="p">],</span> <span class="n">design</span><span class="p">[:,</span><span class="mi">2</span><span class="p">])</span>
+
+<span class="c1"># train an emulator</span>
+<span class="n">scalar_gasp</span> <span class="o">=</span> <span class="n">ScalarGaSP</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span>
+<span class="n">scalar_gasp</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">response</span><span class="p">)</span>
+
+<span class="c1"># the trained emulator needs to be validated before moving on</span>
+<span class="c1"># here we leave out this step for simplicity...</span>
+
+<span class="c1"># draw samples of input for Sobol&#39; analysis</span>
+<span class="n">calc_second_order</span> <span class="o">=</span> <span class="kc">False</span>
+<span class="n">nbase</span> <span class="o">=</span> <span class="mi">1024</span>
+
+<span class="n">saltelli_sampler</span> <span class="o">=</span> <span class="n">Saltelli</span><span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">bounds</span><span class="p">,</span> <span class="n">calc_second_order</span><span class="p">)</span>
+<span class="n">saltelli_samples</span> <span class="o">=</span> <span class="n">saltelli_sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">nbase</span><span class="p">)</span>
+
+<span class="c1"># evaluate the emulator to obtain approximated model output.</span>
+<span class="c1"># in order to take emulator-induced uncertainty into account, we draw 50 realizations</span>
+<span class="c1"># from the emulator</span>
+<span class="n">Y</span> <span class="o">=</span> <span class="n">scalar_gasp</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">saltelli_samples</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+
+<span class="c1"># Compute Sobol&#39; indices based on approximated model outputs</span>
+<span class="n">sobol_analyzer</span> <span class="o">=</span> <span class="n">SobolAnalyze</span><span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">Y</span><span class="p">,</span> <span class="n">calc_second_order</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+<span class="n">S_res</span> <span class="o">=</span> <span class="n">sobol_analyzer</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;parallel&#39;</span><span class="p">,</span> <span class="n">max_workers</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Emulator-based first-order Sobol&#39; index: &quot;</span><span class="p">,</span> <span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">])</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Analytical solution: [0.314, 0.442, 0]&quot;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>The upper bounds of the range parameters are 171.3988 172.3996 172.0213
+The initial values of range parameters are 3.427975 3.447992 3.440426
+Start of the optimization  1  :
+The number of iterations is  14
+ The value of the  marginal posterior  function is  -284.0714
+ Optimized range parameters are 3.183999 2.786247 4.315419
+ Optimized nugget parameter is 0
+ Convergence:  TRUE
+The initial values of range parameters are 1.721972 1.732027 1.728226
+Start of the optimization  2  :
+The number of iterations is  14
+ The value of the  marginal posterior  function is  -284.0714
+ Optimized range parameters are 3.183999 2.786247 4.315419
+ Optimized nugget parameter is 0
+ Convergence:  TRUE
+
+
+Emulator-based first-order Sobol&#39; index:  [0.28708846 0.47245889 0.0073529 ]
+Analytical solution: [0.314, 0.442, 0]
+</pre></div>
+</div>
+<p>The following figure shows how the results of emulator-based Sobol’ analysis
+look like.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">matplotlib.pyplot</span> <span class="k">as</span> <span class="nn">plt</span>
+
+<span class="n">name_vars</span> <span class="o">=</span> <span class="p">[</span><span class="sa">r</span><span class="s1">&#39;$x_1$&#39;</span><span class="p">,</span><span class="sa">r</span><span class="s1">&#39;$x_2$&#39;</span><span class="p">,</span><span class="sa">r</span><span class="s1">&#39;$x_3$&#39;</span><span class="p">]</span>
+<span class="n">x</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;S1&#39;</span><span class="p">:[</span><span class="mi">1</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">7</span><span class="p">],</span> <span class="s1">&#39;ST&#39;</span><span class="p">:[</span><span class="mi">2</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">8</span><span class="p">]}</span>
+<span class="n">color</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;S1&#39;</span><span class="p">:</span><span class="s1">&#39;#69b3a2&#39;</span><span class="p">,</span> <span class="s1">&#39;ST&#39;</span><span class="p">:</span><span class="s1">&#39;#3399e6&#39;</span><span class="p">}</span>
+<span class="n">width</span><span class="o">=</span><span class="mf">0.8</span>
+<span class="n">capsize</span><span class="o">=</span><span class="mi">3</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">ax1</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">3</span><span class="p">))</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">],</span> <span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">][:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">],</span> <span class="n">capsize</span><span class="o">=</span><span class="n">capsize</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.7</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span><span class="mf">4.5</span><span class="p">,</span><span class="mf">7.5</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_xticklabels</span><span class="p">(</span><span class="n">name_vars</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span><span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">labelcolor</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">])</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.25</span><span class="p">)</span>
+<span class="n">ax1</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;First-order index&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">])</span>
+
+<span class="n">ax1</span><span class="o">.</span><span class="n">scatter</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;S1&#39;</span><span class="p">],</span> <span class="p">[</span><span class="mf">0.314</span><span class="p">,</span> <span class="mf">0.442</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">s</span><span class="o">=</span><span class="mi">30</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">,</span> <span class="n">marker</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
+
+<span class="n">ax2</span> <span class="o">=</span> <span class="n">ax1</span><span class="o">.</span><span class="n">twinx</span><span class="p">()</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">],</span> <span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">][:,</span><span class="mi">0</span><span class="p">],</span> <span class="n">width</span><span class="o">=</span><span class="n">width</span><span class="p">,</span> <span class="n">yerr</span><span class="o">=</span><span class="n">S_res</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">][:,</span><span class="mi">2</span><span class="p">],</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">],</span> <span class="n">capsize</span><span class="o">=</span><span class="n">capsize</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">axis</span><span class="p">([</span><span class="mi">0</span><span class="p">,</span><span class="mi">9</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="mf">0.7</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_xticks</span><span class="p">([</span><span class="mf">1.5</span><span class="p">,</span><span class="mf">4.5</span><span class="p">,</span><span class="mf">7.5</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s1">&#39;both&#39;</span><span class="p">,</span><span class="n">bottom</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">tick_params</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="n">labelcolor</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">])</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">yaxis</span><span class="o">.</span><span class="n">grid</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">linestyle</span><span class="o">=</span><span class="s1">&#39;--&#39;</span><span class="p">,</span> <span class="n">which</span><span class="o">=</span><span class="s1">&#39;major&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;grey&#39;</span><span class="p">,</span> <span class="n">alpha</span><span class="o">=</span><span class="mf">.25</span><span class="p">)</span>
+<span class="n">ax2</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s1">&#39;Total-effect index&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="n">color</span><span class="p">[</span><span class="s1">&#39;ST&#39;</span><span class="p">])</span>
+
+<span class="n">plt</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<img src="../../_images/sphx_glr_plot_sobol_analyze_002.png" srcset="../../_images/sphx_glr_plot_sobol_analyze_002.png" alt="plot sobol analyze" class = "sphx-glr-single-img"/><p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 0 minutes  12.674 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-sensitivity-plot-sobol-analyze-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/d3e17d759872695d3b37be8319e77dbf/plot_sobol_analyze.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_sobol_analyze.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/e6e32deb84b9140224f7120b34bdafda/plot_sobol_analyze.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_sobol_analyze.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Sensitivity" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../simulator/index.html" class="btn btn-neutral float-right" title="Simulator" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

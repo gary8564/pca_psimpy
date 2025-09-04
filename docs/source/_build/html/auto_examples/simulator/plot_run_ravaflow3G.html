@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RunSimulator: Ravaflow3G Mixture Model &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <link rel="next" title="Changes" href="../../changelog.html" />
+    <link rel="prev" title="Ravaflow3G Mixture Model" href="plot_ravaflow3G.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../api.html">API &amp; Theory</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../../examples.html">Example Gallery</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../emulator/index.html">Emulator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inference/index.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sampler/index.html">Sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sensitivity/index.html">Sensitivity</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Simulator</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="plot_mass_point_model.html">Mass Point Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_run_mass_point_model.html">RunSimulator: Mass Point Model</a></li>
+<li class="toctree-l3"><a class="reference internal" href="plot_ravaflow3G.html">Ravaflow3G Mixture Model</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">RunSimulator: Ravaflow3G Mixture Model</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../examples.html">Example Gallery</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Simulator</a></li>
+      <li class="breadcrumb-item active">RunSimulator: Ravaflow3G Mixture Model</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../../_sources/auto_examples/simulator/plot_run_ravaflow3G.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <div class="sphx-glr-download-link-note admonition note">
+<p class="admonition-title">Note</p>
+<p>Click <a class="reference internal" href="#sphx-glr-download-auto-examples-simulator-plot-run-ravaflow3g-py"><span class="std std-ref">here</span></a>
+to download the full example code</p>
+</div>
+<section class="sphx-glr-example-title" id="runsimulator-ravaflow3g-mixture-model">
+<span id="sphx-glr-auto-examples-simulator-plot-run-ravaflow3g-py"></span><h1>RunSimulator: Ravaflow3G Mixture Model<a class="headerlink" href="#runsimulator-ravaflow3g-mixture-model" title="Link to this heading"></a></h1>
+<p>This example shows how to run multiple Ravaflow3GMixture simulations in serial
+and parallelly using <a class="reference internal" href="../../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator" title="psimpy.simulator.run_simulator.RunSimulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunSimulator</span></code></a>.</p>
+<p>First, we import the class <a class="reference internal" href="../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture" title="psimpy.simulator.ravaflow3G.Ravaflow3GMixture"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ravaflow3GMixture</span></code></a>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.simulator</span> <span class="kn">import</span> <span class="n">Ravaflow3GMixture</span>
+</pre></div>
+</div>
+<p>To create an instance of this class, we must specify the parameter <code class="docutils literal notranslate"><span class="pre">dir_sim</span></code>.
+It represents the directory in which output files generated by r.avaflow will be
+saved.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="c1"># Here we create a folder called `temp1_run_Ravaflow3GMixture_example` to save</span>
+<span class="c1"># output files generated by r.avaflow</span>
+<span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;temp1_run_Ravaflow3GMixture_example&#39;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;temp1_run_Ravaflow3GMixture_example&#39;</span><span class="p">)</span>
+<span class="n">dir_sim</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="s1">&#39;temp1_run_Ravaflow3GMixture_example&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Given <code class="docutils literal notranslate"><span class="pre">dir_sim</span></code>,  we can create an instance of <a class="reference internal" href="../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture" title="psimpy.simulator.ravaflow3G.Ravaflow3GMixture"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ravaflow3GMixture</span></code></a>.
+To reduce simulation time, we set <code class="docutils literal notranslate"><span class="pre">time_end</span></code> to <span class="math notranslate nohighlight">\(50\)</span>. Other parameters
+are set to their default values.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">voellmy_model</span> <span class="o">=</span> <span class="n">Ravaflow3GMixture</span><span class="p">(</span><span class="n">dir_sim</span><span class="p">,</span> <span class="n">time_end</span><span class="o">=</span><span class="mi">50</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>The <cite>simulator</cite> in this example is defined based on <code class="docutils literal notranslate"><span class="pre">voellmy_model</span></code> as follows.
+It takes required inputs and returns the overall impact area.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+
+<span class="k">def</span> <span class="nf">simulator</span><span class="p">(</span><span class="n">prefix</span><span class="p">,</span> <span class="n">elevation</span><span class="p">,</span> <span class="n">hrelease</span><span class="p">,</span> <span class="n">basal_friction</span><span class="p">,</span> <span class="n">turbulent_friction</span><span class="p">,</span> <span class="n">EPSG</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Preprocess required inputs, run simulation, and return output as a numpy array.&quot;&quot;&quot;</span>
+    <span class="n">grass_location</span><span class="p">,</span> <span class="n">sh_file</span> <span class="o">=</span> <span class="n">voellmy_model</span><span class="o">.</span><span class="n">preprocess</span><span class="p">(</span><span class="n">prefix</span><span class="o">=</span><span class="n">prefix</span><span class="p">,</span> <span class="n">elevation</span><span class="o">=</span><span class="n">elevation</span><span class="p">,</span>
+        <span class="n">hrelease</span><span class="o">=</span><span class="n">hrelease</span><span class="p">,</span> <span class="n">basal_friction</span><span class="o">=</span><span class="n">basal_friction</span><span class="p">,</span> <span class="n">turbulent_friction</span><span class="o">=</span><span class="n">turbulent_friction</span><span class="p">,</span> <span class="n">EPSG</span><span class="o">=</span><span class="n">EPSG</span><span class="p">)</span>
+    <span class="n">voellmy_model</span><span class="o">.</span><span class="n">run</span><span class="p">(</span><span class="n">grass_location</span><span class="p">,</span> <span class="n">sh_file</span><span class="p">)</span> <span class="c1"># run this line, r.avaflow will write outputs to dir_sim</span>
+    <span class="n">impact_area</span> <span class="o">=</span> <span class="n">voellmy_model</span><span class="o">.</span><span class="n">extract_impact_area</span><span class="p">(</span><span class="n">prefix</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">impact_area</span><span class="p">])</span> <span class="c1"># define dir_out and set save_out to True, returned numpy array will be saved to dir_out</span>
+</pre></div>
+</div>
+<p>To demonstrate how to run multiple simulations using <a class="reference internal" href="../../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator" title="psimpy.simulator.run_simulator.RunSimulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunSimulator</span></code></a>,
+we choose <code class="docutils literal notranslate"><span class="pre">basal_friction</span></code> and <code class="docutils literal notranslate"><span class="pre">turbulent_friction</span></code> as variable input
+parameters. Each has two different values, leading to four simulations.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="n">var_inp_parameter</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;basal_friction&#39;</span><span class="p">,</span> <span class="s1">&#39;turbulent_friction&#39;</span><span class="p">]</span>
+<span class="n">basal_friction</span> <span class="o">=</span> <span class="p">[</span><span class="mi">20</span><span class="p">,</span> <span class="mi">30</span><span class="p">]</span>
+<span class="n">turbulent_friction</span> <span class="o">=</span> <span class="p">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">]</span>
+<span class="n">var_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
+    <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="n">basal_friction</span><span class="p">,</span> <span class="n">turbulent_friction</span><span class="p">)])</span>
+</pre></div>
+</div>
+<p>Other parameters of the <cite>simulator</cite>, including <code class="docutils literal notranslate"><span class="pre">elevation</span></code>, <code class="docutils literal notranslate"><span class="pre">hrelease</span></code>, and
+<code class="docutils literal notranslate"><span class="pre">EPSG</span></code> are treated as fixed input. It means that their values are the same in
+all simulations.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">dir_data</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">abspath</span><span class="p">(</span><span class="s1">&#39;../../../tests/data/&#39;</span><span class="p">)</span>
+<span class="n">elevation</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_data</span><span class="p">,</span> <span class="s1">&#39;synthetic_topo.tif&#39;</span><span class="p">)</span>
+<span class="n">hrelease</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">dir_data</span><span class="p">,</span> <span class="s1">&#39;synthetic_rel.tif&#39;</span><span class="p">)</span>
+<span class="n">fix_inp</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;elevation&#39;</span><span class="p">:</span> <span class="n">elevation</span><span class="p">,</span> <span class="s1">&#39;hrelease&#39;</span><span class="p">:</span> <span class="n">hrelease</span><span class="p">,</span> <span class="s1">&#39;EPSG&#39;</span><span class="p">:</span> <span class="s1">&#39;2326&#39;</span><span class="p">}</span>
+</pre></div>
+</div>
+<p>The parameter <code class="docutils literal notranslate"><span class="pre">prefix</span></code> of the <cite>simulator</cite> is special. It is not involved in
+the computational model, but only used to name output files generated by r.avaflow.
+Such parameter is not defined in <code class="docutils literal notranslate"><span class="pre">var_inp_parameter</span></code> or <code class="docutils literal notranslate"><span class="pre">fix_inp</span></code> of
+<a class="reference internal" href="../../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator" title="psimpy.simulator.run_simulator.RunSimulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunSimulator</span></code></a>. Instead, we use a seperate parameter, called <code class="docutils literal notranslate"><span class="pre">o_parameter</span></code>
+for this purpose.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">o_parameter</span> <span class="o">=</span> <span class="s1">&#39;prefix&#39;</span>
+</pre></div>
+</div>
+<p>We may want to save outputs returned by the <cite>simulator</cite> at each simulation for
+later inspection or processing. In that case, we need to define <code class="docutils literal notranslate"><span class="pre">dir_out</span></code> and
+set <code class="docutils literal notranslate"><span class="pre">save_out</span></code> as <cite>True</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="n">cwd</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getcwd</span><span class="p">()</span>
+<span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="s1">&#39;temp2_run_Ravaflow3GMixture_example&#39;</span><span class="p">):</span>
+    <span class="n">os</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="s1">&#39;temp2_run_Ravaflow3GMixture_example&#39;</span><span class="p">)</span>
+<span class="n">dir_out</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="s1">&#39;temp2_run_Ravaflow3GMixture_example&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Please note that <code class="docutils literal notranslate"><span class="pre">dir_out</span></code> and <code class="docutils literal notranslate"><span class="pre">dir_sim</span></code> are two different
+parameters for different purposes.</p>
+<blockquote>
+<div><ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">dir_out</span></code> is a parameter of <a class="reference internal" href="../../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator" title="psimpy.simulator.run_simulator.RunSimulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunSimulator</span></code></a>. The <cite>simulator</cite>
+returns output of interest as a numpy array for each simulation. If
+we want to save this returned output of interest (here impact area)
+to our local machine, we need to specify the value of <code class="docutils literal notranslate"><span class="pre">dir_out</span></code> which
+represents the directory in which output of interest will be saved and
+set <code class="docutils literal notranslate"><span class="pre">save_out</span></code> to <cite>True</cite>. Otherwise, we do not need <code class="docutils literal notranslate"><span class="pre">dir_out</span></code> and
+leave <code class="docutils literal notranslate"><span class="pre">save_out</span></code> to <cite>False</cite>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">dir_sim</span></code> is a parameter of <a class="reference internal" href="../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture" title="psimpy.simulator.ravaflow3G.Ravaflow3GMixture"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ravaflow3GMixture</span></code></a>. <a class="reference internal" href="../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture" title="psimpy.simulator.ravaflow3G.Ravaflow3GMixture"><code class="xref py py-class docutils literal notranslate"><span class="pre">Ravaflow3GMixture</span></code></a>
+relies on the third party software r.avaflow 2.4. When we call
+<a class="reference internal" href="../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture.run" title="psimpy.simulator.ravaflow3G.Ravaflow3GMixture.run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">Ravaflow3GMixture.run()</span></code></a> in the function body of above <cite>simulator</cite>,
+r.avaflow 2.4 will be run and it generates output files. The value of
+<code class="docutils literal notranslate"><span class="pre">dir_sim</span></code> specifies the directory in which output files generated by
+r.avaflow 2.4 are going to be saved.</p></li>
+</ul>
+</div></blockquote>
+<p>The value of <code class="docutils literal notranslate"><span class="pre">dir_out</span></code> and <code class="docutils literal notranslate"><span class="pre">dir_sim</span></code> can be the same if file names
+have no conflict. We recommend to keep them seperate. In addition, if the function
+body of the <cite>simulator</cite> does not write files to disk, <code class="docutils literal notranslate"><span class="pre">dir_sim</span></code> is not required. Our
+<a class="reference internal" href="../../simulator/mass_point_model.html#psimpy.simulator.mass_point_model.MassPointModel" title="psimpy.simulator.mass_point_model.MassPointModel"><code class="xref py py-class docutils literal notranslate"><span class="pre">MassPointModel</span></code></a> is an example. Similarly, if we do not want to save
+returned numpy array of the <cite>simulator</cite>, <code class="docutils literal notranslate"><span class="pre">dir_out</span></code> is not needed.</p>
+</div>
+<p>Now we can define an object of <a class="reference internal" href="../../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator" title="psimpy.simulator.run_simulator.RunSimulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunSimulator</span></code></a> by</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.simulator</span> <span class="kn">import</span> <span class="n">RunSimulator</span>
+
+<span class="n">run_simulator</span> <span class="o">=</span> <span class="n">RunSimulator</span><span class="p">(</span><span class="n">simulator</span><span class="p">,</span> <span class="n">var_inp_parameter</span><span class="p">,</span> <span class="n">fix_inp</span><span class="p">,</span> <span class="n">o_parameter</span><span class="p">,</span>
+    <span class="n">dir_out</span><span class="p">,</span> <span class="n">save_out</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Before running simulations, we need to specify values of <code class="docutils literal notranslate"><span class="pre">prefixes</span></code> which
+will be used to name files generated by each r.avaflow simulation and
+each returned numpy array of <cite>simulator</cite>.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">serial_prefixes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;serial&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">var_samples</span><span class="p">))]</span>
+<span class="n">parallel_prefixes</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;parallel&quot;</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">var_samples</span><span class="p">))]</span>
+</pre></div>
+</div>
+<p>Now we can use <a class="reference internal" href="../../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator.serial_run" title="psimpy.simulator.run_simulator.RunSimulator.serial_run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RunSimulator.serial_run()</span></code></a> method or
+<a class="reference internal" href="../../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator.parallel_run" title="psimpy.simulator.run_simulator.RunSimulator.parallel_run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">RunSimulator.parallel_run()</span></code></a> method to run the simulations
+in serial or parallelly.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">time</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="n">run_simulator</span><span class="o">.</span><span class="n">serial_run</span><span class="p">(</span><span class="n">var_samples</span><span class="o">=</span><span class="n">var_samples</span><span class="p">,</span> <span class="n">prefixes</span><span class="o">=</span><span class="n">serial_prefixes</span><span class="p">)</span>
+<span class="n">serial_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+<span class="n">serial_output</span> <span class="o">=</span> <span class="n">run_simulator</span><span class="o">.</span><span class="n">outputs</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;serial_output: </span><span class="si">{</span><span class="n">serial_output</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+<span class="n">start</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+<span class="c1"># append setting to True means that simulation outputs of parallel run will be</span>
+<span class="c1"># appended to above serial run outputs</span>
+<span class="n">run_simulator</span><span class="o">.</span><span class="n">parallel_run</span><span class="p">(</span><span class="n">var_samples</span><span class="p">,</span> <span class="n">prefixes</span><span class="o">=</span><span class="n">parallel_prefixes</span><span class="p">,</span>
+    <span class="n">max_workers</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">append</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">parallel_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start</span>
+
+<span class="n">parallel_output</span> <span class="o">=</span> <span class="n">run_simulator</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">var_samples</span><span class="p">):]</span>
+<span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;parallel_output: </span><span class="si">{</span><span class="n">parallel_output</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Serial run time: &quot;</span><span class="p">,</span> <span class="n">serial_time</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parallel run time: &quot;</span><span class="p">,</span> <span class="n">parallel_time</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>serial_output: [array([942800.]), array([1425600.]), array([640400.]), array([838400.])]
+parallel_output: [array([942800.]), array([1425600.]), array([640400.]), array([838400.])]
+Serial run time:  49.1287362575531
+Parallel run time:  29.414560079574585
+</pre></div>
+</div>
+<p>All output files returned by the <cite>simulator</cite> are</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dir_out</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&#39;parallel1_output.npy&#39;, &#39;parallel0_output.npy&#39;, &#39;serial2_output.npy&#39;, &#39;parallel3_output.npy&#39;, &#39;serial3_output.npy&#39;, &#39;serial0_output.npy&#39;, &#39;parallel2_output.npy&#39;, &#39;serial1_output.npy&#39;]
+</pre></div>
+</div>
+<p>All output files/directories generated by r.avaflow simulations
+(including files/directories generated during preprocessing) are</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">os</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="n">dir_sim</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="sphx-glr-script-out highlight-none notranslate"><div class="highlight"><pre><span></span>[&#39;parallel1_results&#39;, &#39;parallel3_glocation&#39;, &#39;parallel0_results&#39;, &#39;serial1_results&#39;, &#39;serial2_results&#39;, &#39;serial2_glocation&#39;, &#39;serial1_glocation&#39;, &#39;parallel0_shell.sh&#39;, &#39;parallel1_shell.sh&#39;, &#39;parallel3_shell.sh&#39;, &#39;serial3_shell.sh&#39;, &#39;parallel2_glocation&#39;, &#39;parallel3_results&#39;, &#39;serial1_shell.sh&#39;, &#39;serial2_shell.sh&#39;, &#39;parallel2_results&#39;, &#39;parallel1_glocation&#39;, &#39;serial3_results&#39;, &#39;serial0_results&#39;, &#39;parallel0_glocation&#39;, &#39;serial0_shell.sh&#39;, &#39;serial3_glocation&#39;, &#39;parallel2_shell.sh&#39;, &#39;serial0_glocation&#39;]
+</pre></div>
+</div>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>If one simulation failed due to whatever reason, the error massage
+will be printed to the screen but other simulations will continue. In that
+case, the output file of failed simulation will not be writted to <code class="docutils literal notranslate"><span class="pre">dir_out</span></code>.
+Also, the element of <a class="reference internal" href="../../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator.outputs" title="psimpy.simulator.run_simulator.RunSimulator.outputs"><code class="xref py py-attr docutils literal notranslate"><span class="pre">RunSimulator.outputs</span></code></a> corresponding to that
+simulation will be a string representing the error message, instead of a
+numpy array.</p>
+</div>
+<p>In the end, we delete the folder <cite>temp1_run_Ravaflow3GMixture_example</cite> and
+<cite>temp2_run_Ravaflow3GMixture_example</cite> and all files therein.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">shutil</span>
+
+<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dir_sim</span><span class="p">)</span>
+<span class="n">shutil</span><span class="o">.</span><span class="n">rmtree</span><span class="p">(</span><span class="n">dir_out</span><span class="p">)</span>
+</pre></div>
+</div>
+<p class="sphx-glr-timing"><strong>Total running time of the script:</strong> ( 1 minutes  18.603 seconds)</p>
+<div class="sphx-glr-footer sphx-glr-footer-example docutils container" id="sphx-glr-download-auto-examples-simulator-plot-run-ravaflow3g-py">
+<div class="sphx-glr-download sphx-glr-download-python docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/fbc241a768953bb42ec7c075289d973e/plot_run_ravaflow3G.py"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Python</span> <span class="pre">source</span> <span class="pre">code:</span> <span class="pre">plot_run_ravaflow3G.py</span></code></a></p>
+</div>
+<div class="sphx-glr-download sphx-glr-download-jupyter docutils container">
+<p><a class="reference download internal" download="" href="../../_downloads/80b574d56d2a9a54c2e690b14edc27d7/plot_run_ravaflow3G.ipynb"><code class="xref download docutils literal notranslate"><span class="pre">Download</span> <span class="pre">Jupyter</span> <span class="pre">notebook:</span> <span class="pre">plot_run_ravaflow3G.ipynb</span></code></a></p>
+</div>
+</div>
+<p class="sphx-glr-signature"><a class="reference external" href="https://sphinx-gallery.github.io">Gallery generated by Sphinx-Gallery</a></p>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="plot_ravaflow3G.html" class="btn btn-neutral float-left" title="Ravaflow3G Mixture Model" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../../changelog.html" class="btn btn-neutral float-right" title="Changes" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

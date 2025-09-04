@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>psimpy.inference.active_learning &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
+        <script src="../../../_static/jquery.js"></script>
+        <script src="../../../_static/underscore.js"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
+        <script src="../../../_static/doctools.js"></script>
+        <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+            <a href="../../../index.html" class="icon icon-home"> psimpy
+          </a>
+              <div class="version">
+                0.1.2
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API &amp; Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">psimpy.inference.active_learning</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for psimpy.inference.active_learning</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy</span> <span class="kn">import</span> <span class="n">optimize</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">beartype.typing</span> <span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span> <span class="nn">beartype</span> <span class="kn">import</span> <span class="n">beartype</span>
+<span class="kn">from</span> <span class="nn">psimpy.simulator</span> <span class="kn">import</span> <span class="n">RunSimulator</span>
+<span class="kn">from</span> <span class="nn">psimpy.sampler</span> <span class="kn">import</span> <span class="n">LHS</span>
+<span class="kn">from</span> <span class="nn">psimpy.emulator</span> <span class="kn">import</span> <span class="n">ScalarGaSP</span>
+<span class="kn">from</span> <span class="nn">psimpy.utility</span> <span class="kn">import</span> <span class="n">check_bounds</span>
+
+<span class="n">_min_float</span> <span class="o">=</span> <span class="mi">10</span><span class="o">**</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">min_10_exp</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ActiveLearning"><a class="viewcode-back" href="../../../inference/active_learning.html#psimpy.inference.active_learning.ActiveLearning">[docs]</a><span class="k">class</span> <span class="nc">ActiveLearning</span><span class="p">:</span>
+
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ndim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">bounds</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">data</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">run_sim_obj</span><span class="p">:</span> <span class="n">RunSimulator</span><span class="p">,</span>
+        <span class="n">prior</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span>
+        <span class="n">likelihood</span><span class="p">:</span> <span class="n">Callable</span><span class="p">,</span> 
+        <span class="n">lhs_sampler</span><span class="p">:</span> <span class="n">LHS</span><span class="p">,</span>
+        <span class="n">scalar_gasp</span><span class="p">:</span> <span class="n">ScalarGaSP</span><span class="p">,</span>
+        <span class="n">scalar_gasp_trend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]]</span> <span class="o">=</span> <span class="s1">&#39;constant&#39;</span><span class="p">,</span>
+        <span class="n">indicator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;entropy&#39;</span><span class="p">,</span>
+        <span class="n">optimizer</span><span class="p">:</span> <span class="n">Callable</span> <span class="o">=</span> <span class="n">optimize</span><span class="o">.</span><span class="n">brute</span><span class="p">,</span>
+        <span class="n">args_prior</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kwgs_prior</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">args_likelihood</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kwgs_likelihood</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">args_optimizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kwgs_optimizer</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">dict</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Contruct a scalar GP emulator for natural logarithm  of the product of</span>
+<span class="sd">        prior and likelihood (i.e. unnormalized posterior), via active learning. </span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ndim : int</span>
+<span class="sd">            Dimension of parameter ``x``.</span>
+<span class="sd">        bounds : numpy array</span>
+<span class="sd">            Upper and lower boundaries of each parameter. Shape :code:`(ndim, 2)`.</span>
+<span class="sd">            `bounds[:, 0]` corresponds to lower boundaries of each parameter and</span>
+<span class="sd">            `bounds[:, 1]` to upper boundaries of each parameter. </span>
+<span class="sd">        data : numpy array</span>
+<span class="sd">            Observed data for parameter calibration.</span>
+<span class="sd">        run_sim_obj : instance of class :class:`.RunSimulator`</span>
+<span class="sd">            It has an attribute :py:attr:`simulator` and two methods to run </span>
+<span class="sd">            :py:attr:`simulator`, namely :meth:`.serial_run` and</span>
+<span class="sd">            :meth:`.parallel_run`. For each simulation, :py:attr:`simulator`</span>
+<span class="sd">            must return outputs ``y`` as a numpy array.</span>
+<span class="sd">        prior : Callable</span>
+<span class="sd">            Prior probability density function.</span>
+<span class="sd">            Call with :code:`prior(x, *args_prior, **kwgs_prior)` and return</span>
+<span class="sd">            the value of prior probability density at ``x``.</span>
+<span class="sd">        likelihood : Callable</span>
+<span class="sd">            Likelihood function constructed based on ``data`` and simulation</span>
+<span class="sd">            outputs ``y`` evaluated at ``x``. Call with</span>
+<span class="sd">            :code:`likelihood(y, data, *args_likelihood, **kwgs_likelihood)`</span>
+<span class="sd">            and return the likelihood value at ``x``.</span>
+<span class="sd">        lhs_sampler : instance of class :class:`.LHS`</span>
+<span class="sd">            Latin hypercube sampler used to draw initial samples of ``x``.</span>
+<span class="sd">            These initial samples are used to run initial simulations and build</span>
+<span class="sd">            initial emulator.</span>
+<span class="sd">        scalar_gasp : instance of class :class:`.ScalarGaSP`</span>
+<span class="sd">            An object which sets up the emulator structure. Providing training</span>
+<span class="sd">            data, the emulator can be trained and used to make predictions. </span>
+<span class="sd">        scalar_gasp_trend : str or Callable, optional</span>
+<span class="sd">            Mean function of ``scalar_gasp`` emulator, which is used to</span>
+<span class="sd">            determine the ``trend`` or ``testing_trend`` at given ``design`` or</span>
+<span class="sd">            ``testing_input``.</span>
+<span class="sd">            `&#39;zero&#39;` - trend is set to zero.</span>
+<span class="sd">            `&#39;constant&#39;` - trend is set to a constant.</span>
+<span class="sd">            `&#39;linear&#39;` - trend is linear to design or testing_input.</span>
+<span class="sd">            Callable - a function takes design or testing_input as parameter</span>
+<span class="sd">            and returns the trend.</span>
+<span class="sd">            Default is `&#39;constant&#39;`.</span>
+<span class="sd">        indicator : str, optional</span>
+<span class="sd">            Indicator of uncertainty. `&#39;entropy&#39;` or `&#39;variance&#39;`. Default is</span>
+<span class="sd">            `&#39;entropy&#39;`.</span>
+<span class="sd">        optimizer : Callable, optional</span>
+<span class="sd">            A function which finds the input point ``x`` that minimizes the</span>
+<span class="sd">            uncertainty ``indicator`` at each iteration step.</span>
+<span class="sd">            Call with :code:`optimizer(func, *args_optimizer, **kwgs_optimizer)`. </span>
+<span class="sd">            The objective function ``func`` is defined by the class method</span>
+<span class="sd">            :meth:`_uncertainty_indicator` which have only one argument ``x``.</span>
+<span class="sd">            The ``optimizer`` should return either the solution array, or a</span>
+<span class="sd">            :class:`scipy.optimize.OptimizeResult` object which has the attribute</span>
+<span class="sd">            :py:attr:`x` denoting the solution array.</span>
+<span class="sd">            By default is set to :py:func:`scipy.optimize.brute`.</span>
+<span class="sd">        args_prior : list, optional</span>
+<span class="sd">            Positional arguments for ``prior``.</span>
+<span class="sd">        kwgs_prior: dict, optional</span>
+<span class="sd">            Keyword arguments for ``prior``.</span>
+<span class="sd">        args_likelihood : list, optional</span>
+<span class="sd">            Positional arguments for ``likelihood``.</span>
+<span class="sd">        kwgs_likelihood : dict, optional</span>
+<span class="sd">            Keyword arguments for ``likelihood``.</span>
+<span class="sd">        args_optimizer : list, optional</span>
+<span class="sd">            Positional arguments for ``optimizer``.</span>
+<span class="sd">        kwgs_optimizer : dict, optional</span>
+<span class="sd">            Keyword arguments for ``optimizer``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">run_sim_obj</span><span class="o">.</span><span class="n">var_inp_parameter</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ndim and run_sim_obj are incompatible&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">!=</span> <span class="n">lhs_sampler</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ndim and lhs_sampler are incompatible&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">ndim</span> <span class="o">!=</span> <span class="n">scalar_gasp</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ndim and scalar_gasp are incompatible&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="n">ndim</span>
+
+        <span class="n">check_bounds</span><span class="p">(</span><span class="n">ndim</span><span class="p">,</span> <span class="n">bounds</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>           
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">data</span> <span class="o">=</span> <span class="n">data</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">run_sim_obj</span> <span class="o">=</span> <span class="n">run_sim_obj</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prior</span> <span class="o">=</span> <span class="n">prior</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span> <span class="o">=</span> <span class="n">likelihood</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lhs_sampler</span> <span class="o">=</span> <span class="n">lhs_sampler</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">lhs_sampler</span><span class="o">.</span><span class="n">bounds</span> <span class="o">=</span> <span class="n">bounds</span>
+        
+        <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp</span> <span class="o">=</span> <span class="n">scalar_gasp</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">scalar_gasp_trend</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">scalar_gasp_trend</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;zero&quot;</span><span class="p">,</span><span class="s2">&quot;constant&quot;</span><span class="p">,</span><span class="s2">&quot;linear&quot;</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;unsupported scalar_gasp_trend </span><span class="si">{</span><span class="n">scalar_gasp_trend</span><span class="si">}</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; please choose from &#39;zero&#39;, &#39;constant&#39;, and &#39;linear&#39;&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot; or pass it as a function&quot;</span><span class="p">)</span>            
+        <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span> <span class="o">=</span> <span class="n">scalar_gasp_trend</span>
+        
+        <span class="k">if</span> <span class="n">indicator</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;entropy&quot;</span><span class="p">,</span> <span class="s2">&quot;variance&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;unsupported indicator </span><span class="si">{</span><span class="n">indicator</span><span class="si">}</span><span class="s2">. Please choose from&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; &#39;entropy&#39; and &#39;variance&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indicator</span> <span class="o">=</span> <span class="n">indicator</span>
+    
+        <span class="k">if</span> <span class="n">optimizer</span> <span class="ow">is</span> <span class="n">optimize</span><span class="o">.</span><span class="n">brute</span><span class="p">:</span>
+            <span class="n">ranges</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">bounds</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ndim</span><span class="p">))</span>
+            <span class="n">args_optimizer</span> <span class="o">=</span> <span class="p">[</span><span class="n">ranges</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">kwgs_optimizer</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">allowed_keys</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Ns&quot;</span><span class="p">,</span> <span class="s2">&quot;workers&quot;</span><span class="p">}</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">kwgs_optimizer</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">allowed_keys</span><span class="p">):</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                        <span class="s2">&quot;allowed keys are &#39;Ns&#39; and &#39;workers&#39; for&quot;</span>
+                        <span class="s2">&quot; optimize.brute&quot;</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">kwgs_optimizer</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Ns&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">}</span>
+            <span class="n">kwgs_optimizer</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="s2">&quot;finish&quot;</span><span class="p">:</span> <span class="kc">None</span><span class="p">})</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span> <span class="o">=</span> <span class="n">optimizer</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">args_prior</span> <span class="o">=</span> <span class="p">()</span> <span class="k">if</span> <span class="n">args_prior</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">args_prior</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwgs_prior</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">kwgs_prior</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">kwgs_prior</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">args_likelihood</span> <span class="o">=</span> <span class="p">()</span> <span class="k">if</span> <span class="n">args_likelihood</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">args_likelihood</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwgs_likelihood</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">kwgs_likelihood</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">kwgs_likelihood</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">args_optimizer</span><span class="o">=</span><span class="p">()</span> <span class="k">if</span> <span class="n">args_optimizer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">args_optimizer</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kwgs_optimizer</span><span class="o">=</span><span class="p">{}</span> <span class="k">if</span> <span class="n">kwgs_optimizer</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">kwgs_optimizer</span>
+
+
+<div class="viewcode-block" id="ActiveLearning.initial_simulation"><a class="viewcode-back" href="../../../inference/active_learning.html#psimpy.inference.active_learning.ActiveLearning.initial_simulation">[docs]</a>    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">initial_simulation</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">n0</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">prefixes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">mode</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;serial&#39;</span><span class="p">,</span>
+        <span class="n">max_workers</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run ``n0`` initial simulations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        n0 : int</span>
+<span class="sd">            Number of initial simulation runs.</span>
+<span class="sd">        prefixes : list of str, optional</span>
+<span class="sd">            Consist of ``n0`` strings. Each is used to name corresponding</span>
+<span class="sd">            simulation output file(s).</span>
+<span class="sd">            If `None`, `&#39;sim0&#39;`, `&#39;sim1&#39;`, ... are used.   </span>
+<span class="sd">        mode : str, optional</span>
+<span class="sd">            `&#39;parallel&#39;` or `&#39;serial&#39;`. Run `n0` simulations in parallel or</span>
+<span class="sd">            in serial.</span>
+<span class="sd">        max_workers : int, optional</span>
+<span class="sd">            Controls the maximum number of tasks running in parallel.</span>
+<span class="sd">            Default is the number of CPUs on the host.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        init_var_samples: numpy array</span>
+<span class="sd">            Variable input samples for ``n0`` initial simulations.</span>
+<span class="sd">            Shape of :code:`(n0, ndim)`.</span>
+<span class="sd">        init_sim_outputs : numpy array</span>
+<span class="sd">            Outputs of ``n0`` intial simulations.</span>
+<span class="sd">            :code:`init_sim_outputs.shape[0]` is ``n0``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">init_var_samples</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lhs_sampler</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">n0</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;parallel&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_sim_obj</span><span class="o">.</span><span class="n">parallel_run</span><span class="p">(</span><span class="n">init_var_samples</span><span class="p">,</span> <span class="n">prefixes</span><span class="p">,</span>
+                <span class="n">append</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">max_workers</span><span class="o">=</span><span class="n">max_workers</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">mode</span> <span class="o">==</span> <span class="s1">&#39;serial&#39;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_sim_obj</span><span class="o">.</span><span class="n">serial_run</span><span class="p">(</span><span class="n">init_var_samples</span><span class="p">,</span> <span class="n">prefixes</span><span class="p">,</span>
+                <span class="n">append</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;mode must be &#39;parallel&#39; or &#39;serial&#39;&quot;</span><span class="p">)</span>
+        
+        <span class="n">init_sim_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">run_sim_obj</span><span class="o">.</span><span class="n">outputs</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">init_var_samples</span><span class="p">,</span> <span class="n">init_sim_outputs</span></div>
+    
+<div class="viewcode-block" id="ActiveLearning.iterative_emulation"><a class="viewcode-back" href="../../../inference/active_learning.html#psimpy.inference.active_learning.ActiveLearning.iterative_emulation">[docs]</a>    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">iterative_emulation</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ninit</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">init_var_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">init_sim_outputs</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">niter</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">iter_prefixes</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Sequentially pick ``niter`` new input points based on ``ninit``</span>
+<span class="sd">        simulations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        niter : int</span>
+<span class="sd">            Number of interative simulaitons.</span>
+<span class="sd">        ninit : int</span>
+<span class="sd">            Number of initial simulations.</span>
+<span class="sd">        init_var_samples: numpy array</span>
+<span class="sd">            Variable input samples for ``ninit`` simulations.</span>
+<span class="sd">            Shape of :code:`(ninit, ndim)`.</span>
+<span class="sd">        init_sim_outputs : numpy array</span>
+<span class="sd">            Outputs of ``ninit`` simulations.</span>
+<span class="sd">            :code:`init_sim_outputs.shape[0]` is ``ninit``. </span>
+<span class="sd">        iter_prefixes : list of str, optional</span>
+<span class="sd">            Consist of ``niter`` strings. Each is used to name</span>
+<span class="sd">            corresponding iterative simulation output file(s).</span>
+<span class="sd">            If `None`, `&#39;iter_sim0&#39;`, `&#39;iter_sim1&#39;`, ... are used.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        var_samples : numpy array</span>
+<span class="sd">            Variable input samples of ``ninit`` simulations and ``niter``</span>
+<span class="sd">            iterative simulations. Shape of :code:`(ninit+niter, ndim)`.</span>
+<span class="sd">        sim_outputs : numpy array</span>
+<span class="sd">            Outputs of ``ninit`` and ``niter`` simulations. </span>
+<span class="sd">            :code:`sim_outputs.shape[0]` is :math:`ninit+niter`.</span>
+<span class="sd">        ln_pxl_values : numpy array</span>
+<span class="sd">            Natural logarithm values of the product of prior and likelihood </span>
+<span class="sd">            at ``ninit`` and ``niter`` simulations. </span>
+<span class="sd">            Shape of :code:`(ninit+niter,)`.</span>
+<span class="sd">        </span>
+<span class="sd">        Notes</span>
+<span class="sd">        -----</span>
+<span class="sd">        If a duplicated iteration point is returned by the ``optimizer``, the</span>
+<span class="sd">        iteration will be stopped right away. In that case, the first dimension</span>
+<span class="sd">        of returned ``var_samples``, ``sim_outputs``, ``ln_pxl_values`` is smaller</span>
+<span class="sd">        than :math:`ninit+niter`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">init_var_samples</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="p">(</span><span class="n">ninit</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;init_var_samples must be of shape (ninit, ndim)&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">init_sim_outputs</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">ninit</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;init_sim_outputs.shape[0] must equal to ninit&quot;</span><span class="p">)</span>
+        
+        <span class="k">if</span> <span class="n">iter_prefixes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">iter_prefixes</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;iter_sim</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">niter</span><span class="p">)]</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">iter_prefixes</span><span class="p">)</span> <span class="o">!=</span> <span class="n">niter</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;iter_prefixes must have niter number of items&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">iter_prefixes</span><span class="p">))</span> <span class="o">!=</span> <span class="n">niter</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Each item of iter_prefixes must be unique&quot;</span><span class="p">)</span>
+        
+        <span class="n">ln_pxl_values</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_ln_pxl</span><span class="p">(</span><span class="n">init_var_samples</span><span class="p">[</span><span class="n">i</span><span class="p">,:],</span> <span class="n">init_sim_outputs</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">ninit</span><span class="p">)</span>
+            <span class="p">]</span>
+        <span class="n">var_samples</span> <span class="o">=</span> <span class="n">init_var_samples</span>
+        <span class="n">sim_outputs</span> <span class="o">=</span> <span class="n">init_sim_outputs</span>
+        
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">niter</span><span class="p">):</span>
+            
+            <span class="bp">self</span><span class="o">.</span><span class="n">_emulate_ln_pxl</span><span class="p">(</span><span class="n">var_samples</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ln_pxl_values</span><span class="p">))</span>
+
+            <span class="n">opt_res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">optimizer</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_uncertainty_indicator</span><span class="p">,</span>
+                <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args_optimizer</span><span class="p">,</span>
+                <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwgs_optimizer</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt_res</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">):</span>
+                <span class="n">next_var_sample</span> <span class="o">=</span> <span class="n">opt_res</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">opt_res</span><span class="p">,</span> <span class="n">optimize</span><span class="o">.</span><span class="n">OptimizeResult</span><span class="p">):</span>
+                <span class="n">next_var_sample</span> <span class="o">=</span> <span class="n">opt_res</span><span class="o">.</span><span class="n">x</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                    <span class="s2">&quot;Optimizer must return a 1d numpy array representing the&quot;</span>
+                    <span class="s2">&quot; solution or a OptimizeResult object having x attribute&quot;</span><span class="p">)</span>
+            
+            <span class="n">next_var_sample</span> <span class="o">=</span> <span class="n">next_var_sample</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+            <span class="n">temp_var_samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">var_samples</span><span class="p">,</span> <span class="n">next_var_sample</span><span class="p">))</span>
+
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">temp_var_samples</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">))</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_samples</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="nb">print</span><span class="p">(</span>
+                    <span class="s2">&quot;Optimizer finds duplicated next_var_sample at&quot;</span>
+                    <span class="s2">&quot; iteration </span><span class="si">{i}</span><span class="s2">. The active learning process will&quot;</span>
+                    <span class="s2">&quot; be terminated.&quot;</span><span class="p">)</span>
+                <span class="k">break</span>
+
+            <span class="n">var_samples</span> <span class="o">=</span> <span class="n">temp_var_samples</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">run_sim_obj</span><span class="o">.</span><span class="n">serial_run</span><span class="p">(</span><span class="n">next_var_sample</span><span class="p">,</span> <span class="p">[</span><span class="n">iter_prefixes</span><span class="p">[</span><span class="n">i</span><span class="p">]],</span>
+                <span class="n">append</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">next_sim_output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">run_sim_obj</span><span class="o">.</span><span class="n">outputs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">sim_outputs</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">vstack</span><span class="p">((</span><span class="n">sim_outputs</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">next_sim_output</span><span class="p">])))</span>
+
+            <span class="n">next_ln_pxl_value</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_ln_pxl</span><span class="p">(</span>
+                <span class="n">next_var_sample</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="n">next_sim_output</span><span class="p">)</span>
+            <span class="n">ln_pxl_values</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">next_ln_pxl_value</span><span class="p">)</span>
+        
+        <span class="c1"># train final scalar gasp</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_emulate_ln_pxl</span><span class="p">(</span><span class="n">var_samples</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ln_pxl_values</span><span class="p">))</span>
+        
+        <span class="n">ln_pxl_values</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">ln_pxl_values</span><span class="p">)</span>
+        
+        <span class="k">return</span> <span class="n">var_samples</span><span class="p">,</span> <span class="n">sim_outputs</span><span class="p">,</span> <span class="n">ln_pxl_values</span></div>
+
+<div class="viewcode-block" id="ActiveLearning.approx_ln_pxl"><a class="viewcode-back" href="../../../inference/active_learning.html#psimpy.inference.active_learning.ActiveLearning.approx_ln_pxl">[docs]</a>    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">approx_ln_pxl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Approximate `ln_pxl` value at ``x`` based on the trained emulator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : numpy array</span>
+<span class="sd">            One variable sample at which `ln_pxl` is to be approximated. Shape of</span>
+<span class="sd">            :code:`(ndim,)`.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        A float value which is the emulator-predicted `ln_pxl` value at ``x``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_ln_pxl</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">predict</span><span class="p">[:,</span><span class="mi">0</span><span class="p">])</span></div>
+
+    
+    <span class="k">def</span> <span class="nf">_compute_ln_pxl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">y</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;Compute natural logarithm of the product of prior and likelihood.</span>
+<span class="sd">        </span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : numpy array</span>
+<span class="sd">            Variable input of :py:func:`simulator`. Shape of :code:`(ndim,)`.</span>
+<span class="sd">        y : numpy array</span>
+<span class="sd">            Simulation outputs at ``x``.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ln_pxl_val : float</span>
+<span class="sd">            Natural logarithm of the product of prior and likelihood at ``x``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">prior_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">prior</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args_prior</span><span class="p">,</span> <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwgs_prior</span><span class="p">)</span>
+        <span class="n">likelihood_val</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">likelihood</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">data</span><span class="p">,</span> <span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">args_likelihood</span><span class="p">,</span>
+            <span class="o">**</span><span class="bp">self</span><span class="o">.</span><span class="n">kwgs_likelihood</span><span class="p">)</span>
+        <span class="n">pxl_val</span> <span class="o">=</span> <span class="n">prior_val</span> <span class="o">*</span> <span class="n">likelihood_val</span>
+        
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="n">pxl_val</span><span class="p">,</span> <span class="n">_min_float</span><span class="p">)))</span>
+
+    
+    <span class="k">def</span> <span class="nf">_emulate_ln_pxl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">var_samples</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">ln_pxl_values</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+        <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Train scalar gasp emulator for natural lograthim of the product of prior</span>
+<span class="sd">        and likelihood based on ``n`` simulations.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        var_samples: numpy array</span>
+<span class="sd">            Variable inputs samples for ``n`` simulations. Shape of</span>
+<span class="sd">            :code:`(n, ndim)`.</span>
+<span class="sd">        ln_pxl_values : numpy array</span>
+<span class="sd">            Natural lograthim values of the product of prior and likelhood</span>
+<span class="sd">            corresponding to ``n`` simulations. Shape of :code:`(n,)`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_samples</span><span class="p">)</span> 
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span> <span class="o">==</span> <span class="s2">&quot;zero&quot;</span><span class="p">:</span>
+                <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
+                <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">n</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+                <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">n</span><span class="p">),</span> <span class="n">var_samples</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span><span class="p">(</span><span class="n">var_samples</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">var_samples</span><span class="p">,</span> <span class="n">ln_pxl_values</span><span class="p">,</span> <span class="n">trend</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">_predict_ln_pxl</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make prediction of `ln_pxl` at ``x`` using the emulator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : numpy array</span>
+<span class="sd">            One variable input point. Shape of :code:`(ndim,)`.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        predict : numpy array</span>
+<span class="sd">            Emulator-prediction at ``x``. Shape :code:`(1, 4)`.</span>
+<span class="sd">            `predict[0, 0]` - mean,</span>
+<span class="sd">            `predict[0, 1]` - low95,</span>
+<span class="sd">            `predict[0, 2]` - upper95,</span>
+<span class="sd">            `predict[0, 3]` - sd.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">reshape</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span> 
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span> <span class="o">==</span> <span class="s2">&quot;zero&quot;</span><span class="p">:</span>
+                <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span> <span class="o">==</span> <span class="s2">&quot;constant&quot;</span><span class="p">:</span>
+                <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
+                <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">c_</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span> <span class="n">x</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">trend</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp_trend</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="n">predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scalar_gasp</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">trend</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">predict</span>
+
+    <span class="k">def</span> <span class="nf">_uncertainty_indicator</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">x</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Indicator of uncertainty.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        x : numpy array</span>
+<span class="sd">            One variable input point. Shape of :code:`(ndim,)`.</span>
+<span class="sd">        </span>
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        neg_val : float</span>
+<span class="sd">            Negative value of uncertainty indicator at ``x``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">predict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_predict_ln_pxl</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+        
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">predict</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">]</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">predict</span><span class="p">[:,</span> <span class="mi">3</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">indicator</span> <span class="o">==</span> <span class="s2">&quot;entropy&quot;</span><span class="p">:</span>
+            <span class="n">neg_val</span> <span class="o">=</span> <span class="o">-</span><span class="n">mean</span> <span class="o">-</span> <span class="mf">0.5</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="o">*</span><span class="n">np</span><span class="o">.</span><span class="n">e</span><span class="o">*</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">_min_float</span><span class="p">)</span>
+                <span class="p">)</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">indicator</span> <span class="o">==</span> <span class="s2">&quot;variance&quot;</span><span class="p">:</span>
+            <span class="n">neg_val</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="n">mean</span> <span class="o">+</span> <span class="mi">2</span><span class="o">*</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">maximum</span><span class="p">(</span><span class="mi">1</span><span class="o">-</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">),</span> <span class="n">_min_float</span><span class="p">)</span>
+                <span class="p">)</span>
+        
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">neg_val</span><span class="p">)</span></div>
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2023, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

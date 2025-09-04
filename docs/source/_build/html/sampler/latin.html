@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Latin Hypercube Sampling &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Metropolis Hastings Sampling" href="metropolis_hastings.html" />
+    <link rel="prev" title="Sampler" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API &amp; Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../emulator/index.html">Emulator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inference/index.html">Inference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Sampler</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#"> Latin Hypercube</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#lhs-class">LHS Class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="metropolis_hastings.html"> Metropolis Hastings</a></li>
+<li class="toctree-l3"><a class="reference internal" href="saltelli.html"> Saltelli</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../sensitivity/index.html">Sensitivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simulator/index.html">Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API &amp; Theory</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Sampler</a></li>
+      <li class="breadcrumb-item active">Latin Hypercube Sampling</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/sampler/latin.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="latin-hypercube-sampling">
+<h1>Latin Hypercube Sampling<a class="headerlink" href="#latin-hypercube-sampling" title="Link to this heading"></a></h1>
+<p>Latin hypercube sampling is one type of space-filling sampling method. It is often
+used to draw input points for emulator training. The following figure gives a
+three-dimensional example.</p>
+<a class="reference internal image-reference" href="../_images/latin_hypercube_sampling_sketch.png"><img alt="an illustration of Latin hypercube sampling" class="align-center" src="../_images/latin_hypercube_sampling_sketch.png" style="width: 800px;" /></a>
+<p>Three random variables <span class="math notranslate nohighlight">\(X\)</span>, <span class="math notranslate nohighlight">\(Y\)</span>, and <span class="math notranslate nohighlight">\(Z\)</span> consist of
+a three-dimensional space. If we want to draw <span class="math notranslate nohighlight">\(6\)</span> samples from this space
+using Latin hypercube sampling, we first divide the range of each variable into
+<span class="math notranslate nohighlight">\(6\)</span> equally probable intervals as shown on the left. In each interval,
+we pick a value for the corresponding variable. Then we shuffle the picked values
+of each variable (e.g. <span class="math notranslate nohighlight">\(x_1\)</span> to <span class="math notranslate nohighlight">\(x_6\)</span>) as shown in the middle. Last,
+each combination gives us one sample of the three variables as shown on the right.
+It should be noted that each sample excludes any other samples from the intervals
+that it locates in. This can be straightforwardly extended to draw <span class="math notranslate nohighlight">\(M\)</span> samples
+from <span class="math notranslate nohighlight">\(N\)</span>-dimensional space consisting of <span class="math notranslate nohighlight">\(N\)</span> random variables.</p>
+<section id="lhs-class">
+<h2>LHS Class<a class="headerlink" href="#lhs-class" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="#psimpy.sampler.latin.LHS" title="psimpy.sampler.latin.LHS"><code class="xref py py-class docutils literal notranslate"><span class="pre">LHS</span></code></a> class is imported by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.sampler.latin</span> <span class="kn">import</span> <span class="n">LHS</span>
+</pre></div>
+</div>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="psimpy.sampler.latin.LHS">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">LHS</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">criterion</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'random'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iteration</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/sampler/latin.html#LHS"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.sampler.latin.LHS" title="Link to this definition"></a></dt>
+<dd><p>Latin hypercube sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> (<em>int</em>) – Dimension of parameters.</p></li>
+<li><p><strong>bounds</strong> (<em>numpy array</em>) – Upper and lower boundaries of each parameter. Shape <code class="code docutils literal notranslate"><span class="pre">(ndim,</span> <span class="pre">2)</span></code>.
+<cite>bounds[:, 0]</cite> corresponds to lower boundaries of each parameter and
+<cite>bounds[:, 1]</cite> to upper boundaries of each parameter.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Seed to initialize the pseudo-random number generator.</p></li>
+<li><p><strong>criterion</strong> (<em>str</em><em>, </em><em>optional</em>) – Criterion for generating Latin hypercube samples.
+<cite>‘random’</cite> - randomly locate samples in each bin.
+<cite>‘center’</cite> - locate samples in bin centers.
+<cite>‘maximin’</cite> - locate samples in each bin by maximizing their minimum
+distance.
+Default is <cite>‘random’</cite>.</p></li>
+<li><p><strong>iteration</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of iterations if <code class="code docutils literal notranslate"><span class="pre">criterion='maximin'</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.sampler.latin.LHS.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nsamples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/sampler/latin.html#LHS.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.sampler.latin.LHS.sample" title="Link to this definition"></a></dt>
+<dd><p>Draw Latin hypercube samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to be drawn.</p>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>lhs_samples</strong> – Latin hypercube samples. Shape <code class="code docutils literal notranslate"><span class="pre">(nsamples,</span> <span class="pre">ndim)</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>The <a class="reference internal" href="#psimpy.sampler.latin.LHS" title="psimpy.sampler.latin.LHS"><code class="xref py py-class docutils literal notranslate"><span class="pre">LHS</span></code></a> class considers each random variable being uniformly
+distributed in its range. If this is not the case, one needs to transform picked
+samples accordingly.</p>
+</div>
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Sampler" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="metropolis_hastings.html" class="btn btn-neutral float-right" title="Metropolis Hastings Sampling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>RobustGaSP &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Inference" href="../inference/index.html" />
+    <link rel="prev" title="Emulator" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API &amp; Theory</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Emulator</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#"> RobustGaSP</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#theory-recap-of-gp-emulation">Theory recap of GP emulation</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#scalargasp-class">ScalarGaSP Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#ppgasp-class">PPGaSP Class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../inference/index.html">Inference</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sampler/index.html">Sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sensitivity/index.html">Sensitivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simulator/index.html">Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API &amp; Theory</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Emulator</a></li>
+      <li class="breadcrumb-item active">RobustGaSP</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/emulator/robustgasp.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="robustgasp">
+<h1>RobustGaSP<a class="headerlink" href="#robustgasp" title="Link to this heading"></a></h1>
+<p><cite>RobustGaSP</cite>, standing for <cite>Robust Gaussian Stochastic Process Emulation</cite>, is a
+<cite>R</cite> package developed by <span id="id1">Gu <em>et al.</em> [<a class="reference internal" href="../refs.html#id6" title="Meng Yang Gu, Jesus Palomo, and James O. Berger. Robustgasp: robust Gaussian stochastic process emulation in R. The R Journal, 11(1):112–136, 2019. doi:10.32614/RJ-2019-011.">2019</a>]</span>. It implements robust methods to
+estimate the unknown parameters which can greatly improve predictive performance
+of the built emulator. In addition, it implements the <cite>PP GaSP</cite> (parallel partial
+Gaussian stochastic process) emulator for simulators which return multiple values
+as output, see <span id="id2">Gu and Berger [<a class="reference internal" href="../refs.html#id4" title="Meng Yang Gu and James O. Berger. Parallel partial Gaussian process emulation for computer models with massive output. Annals of Applied Statistics, 10(3):1317–1347, 2016. doi:10.1214/16-AOAS934.">2016</a>]</span> for more detail.</p>
+<p>In <code class="xref py py-mod docutils literal notranslate"><span class="pre">PSimPy.emulator.robustgasp</span></code>, we have implemented class
+<a class="reference internal" href="#psimpy.emulator.robustgasp.ScalarGaSP" title="psimpy.emulator.robustgasp.ScalarGaSP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarGaSP</span></code></a> and  class <a class="reference internal" href="#psimpy.emulator.robustgasp.PPGaSP" title="psimpy.emulator.robustgasp.PPGaSP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPGaSP</span></code></a> based on <cite>RobustGaSP</cite> and
+<cite>rpy2</cite>, which allows us to use <cite>RobustGaSP</cite> directly from within <cite>Python</cite>.</p>
+<section id="theory-recap-of-gp-emulation">
+<h2>Theory recap of GP emulation<a class="headerlink" href="#theory-recap-of-gp-emulation" title="Link to this heading"></a></h2>
+<p>A simulator represents a mapping from an input space to an output space.
+Gaussian process emulation treats a computationally expensive simulator as an
+unknown function from a Bayesian perspective: the prior belief of the simulator,
+namely a Gaussian process, is updated based on a modest number of simulation runs,
+leading to a posterior which can be evaluated much faster than the simulator and
+can then be used for computationally demanding analyses <span id="id3">[<a class="reference internal" href="../refs.html#id14" title="H. Zhao, F. Amann, and J. Kowalski. Emulator-based global sensitivity analysis for flow-like landslide run-out models. Landslides, ():, 2021. doi:https://doi.org/10.1007/s10346-021-01690-w.">Zhao <em>et al.</em>, 2021</a>]</span>. A recap
+of Gaussian process emulation is provided below, which is adapted from <cite>Chapter 3</cite>
+of <span id="id4">Zhao [<a class="reference internal" href="../refs.html#id15" title="Hu Zhao. Gaussian processes for sensitivity analysis, Bayesian inference, and uncertainty quantification in landslide research. PhD thesis, RWTH Aachen University, 2021. doi:10.18154/RWTH-2021-11693.">2021</a>]</span>.</p>
+<section id="gp-prior">
+<h3>GP prior<a class="headerlink" href="#gp-prior" title="Link to this heading"></a></h3>
+<p>Let <span class="math notranslate nohighlight">\(f(\cdot)\)</span> denote a simulator that one wants to approximate. It
+defines a mapping from a <span class="math notranslate nohighlight">\(p\)</span>-dimensional input
+<span class="math notranslate nohighlight">\(\mathbf{x}=(x_1,\ldots,x_p)^T \in \mathcal{X} \subset{\mathbb{R}^p}\)</span>
+to a scalar output <span class="math notranslate nohighlight">\(y \in \mathbb{R}\)</span>.</p>
+<p>From the Bayesian perspective, the prior belief of the simulator is modeled by
+a Gaussian process, namely</p>
+<div class="math notranslate nohighlight" id="equation-gp">
+<span class="eqno">(1)<a class="headerlink" href="#equation-gp" title="Link to this equation"></a></span>\[f(\cdot) \sim \mathcal{GP}(m(\cdot), C(\cdot,\cdot)).\]</div>
+<p>The Gaussian process is fully specified by its mean function <span class="math notranslate nohighlight">\(m(\cdot)\)</span>
+and covariance function <span class="math notranslate nohighlight">\(C(\cdot,\cdot)\)</span>. The mean function is usually
+modeled by parametric regression</p>
+<div class="math notranslate nohighlight" id="equation-gpmean">
+<span class="eqno">(2)<a class="headerlink" href="#equation-gpmean" title="Link to this equation"></a></span>\[m(\mathbf{x})=\mathbf{h}^T(\mathbf{x}) \boldsymbol{\beta}=\sum_{t=1}^{q} h_{t}(\mathbf{x}) \beta_{t},\]</div>
+<p>with <span class="math notranslate nohighlight">\(q\)</span>-dimensional vectors
+<span class="math notranslate nohighlight">\(\mathbf{h}(\mathbf{x})=\left(h_{1}(\mathbf{x}), h_{2}(\mathbf{x}), \ldots, h_{q}(\mathbf{x})\right)^T\)</span>
+and <span class="math notranslate nohighlight">\(\boldsymbol{\beta}=\left(\beta_{1}, \beta_{2}, \ldots, \beta_{q}\right)^T\)</span>
+denoting the chosen basis functions and unknown regression parameters respectively.
+The basis functions are commonly chosen as constant <span class="math notranslate nohighlight">\(\mathbf{h}(\mathbf{x})=1\)</span>
+or some prescribed polynomials like <span class="math notranslate nohighlight">\(\mathbf{h}(\mathbf{x})=(1,x_1,\ldots,x_p)^T\)</span>.</p>
+<p>The covariance function is often assumed to be stationary and typically has a
+separable form of</p>
+<div class="math notranslate nohighlight" id="equation-gpcovariance">
+<span class="eqno">(3)<a class="headerlink" href="#equation-gpcovariance" title="Link to this equation"></a></span>\[C\left(\mathbf{x}_{i}, \mathbf{x}_{j}\right)=\sigma^2 c\left(\mathbf{x}_{i}, \mathbf{x}_{j}\right)=\sigma^2 \prod_{l=1}^{p} c_{l}\left(x_{i l}, x_{j l}\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(c\left(\mathbf{x}_{i}, \mathbf{x}_{j}\right)\)</span> is the correlation
+function, and <span class="math notranslate nohighlight">\(c_{l}\left(x_{i l}, x_{j l}\right)\)</span> corresponds to the
+correlation between the <span class="math notranslate nohighlight">\(l\)</span>-th component of <span class="math notranslate nohighlight">\(\mathbf{x}_i`\)</span> and
+the counterpart of <span class="math notranslate nohighlight">\(\mathbf{x}_j\)</span>. Various correlation functions can be
+chosen for <span class="math notranslate nohighlight">\(c_{l}\left(x_{i l}, x_{j l}\right)\)</span>. In what follows a specific
+correlation function from the Matern family is chosen to illustrate the theory.
+It should be noted that it can be replaced by any other correlation function
+without loss of generality.</p>
+<div class="math notranslate nohighlight" id="equation-gpcorrelation">
+<span class="eqno">(4)<a class="headerlink" href="#equation-gpcorrelation" title="Link to this equation"></a></span>\[c_{l}\left(x_{i l}, x_{j l}\right) = \left(1+\frac{\sqrt{5}||x_{il}-x_{jl}||}{\psi_l}+\frac{5||x_{il}-x_{jl}||^2}{3\psi_{l}^{2}} \right) \exp{\left(-\frac{\sqrt{5}||x_{il}-x_{jl}||}{\psi_l}\right)},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\psi_l\)</span> is the correlation length parameter in the <span class="math notranslate nohighlight">\(l\)</span>-th
+dimension. The unknowns in the covariance function
+<span class="math notranslate nohighlight">\(C\left(\mathbf{x}_{i}, \mathbf{x}_{j}\right)\)</span> are the variance
+<span class="math notranslate nohighlight">\(\sigma^2\)</span> and the <span class="math notranslate nohighlight">\(p\)</span> correlation length parameters
+<span class="math notranslate nohighlight">\(\boldsymbol{\psi}=(\psi_1,\ldots,\psi_p)^T\)</span>.</p>
+</section>
+<section id="gp-posterior">
+<h3>GP posterior<a class="headerlink" href="#gp-posterior" title="Link to this heading"></a></h3>
+<p>Equations <a class="reference internal" href="#equation-gp">(1)</a> to <a class="reference internal" href="#equation-gpcorrelation">(4)</a> encode prior knowledge of the simulator
+<span class="math notranslate nohighlight">\(f(\cdot)\)</span>. From the Bayesian viewpoint, this prior knowledge can be updated
+to a posterior based on a limited number of training data. Training data here refer
+to <span class="math notranslate nohighlight">\(n^{tr}\)</span> pairs of input-output data of <span class="math notranslate nohighlight">\(f(\cdot)\)</span>.</p>
+<p>Let <span class="math notranslate nohighlight">\(\mathbf{x}^{tr}:=\{\mathbf{x}_i\}_{i=1}^{n^{tr}}\)</span> and
+<span class="math notranslate nohighlight">\(\mathbf{y}^{tr}:=\{f(\mathbf{x}_i)\}_{i=1}^{n^{tr}}\)</span> denote the training
+inputs and outputs respectively. Since any finite number of random variables
+from a Gaussian process are jointly Gaussian distributed, the joint distribution
+of the <span class="math notranslate nohighlight">\(n^{tr}\)</span> outputs <span class="math notranslate nohighlight">\(\mathbf{y}^{tr}\)</span> follow a
+<span class="math notranslate nohighlight">\(n^{tr}\)</span>-dimensional Gaussian distribution</p>
+<div class="math notranslate nohighlight" id="equation-gplikelihood1">
+<span class="eqno">(5)<a class="headerlink" href="#equation-gplikelihood1" title="Link to this equation"></a></span>\[p(\mathbf{y}^{tr} | \boldsymbol{\beta}, \sigma^{2}, \boldsymbol{\psi})  \sim \mathcal{N}_{n^{tr}}\left(\mathbf{H}\boldsymbol{\beta}, \sigma^{2} \mathbf{R}\right),\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{H}=\left[\mathbf{h}(\mathbf{x}_{1}), \ldots, \mathbf{h}(\mathbf{x}_{n^{tr}}) \right]^T\)</span>
+is the <span class="math notranslate nohighlight">\(n^{tr} \times q\)</span> basis design matrix and <span class="math notranslate nohighlight">\(\mathbf{R}\)</span> is the
+<span class="math notranslate nohighlight">\(n^{tr} \times n^{tr}\)</span> correlation matrix with <span class="math notranslate nohighlight">\((i,j)\)</span> element
+<span class="math notranslate nohighlight">\(c(\mathbf{x}_{i}, \mathbf{x}_{j})\)</span>. Equation <a class="reference internal" href="#equation-gplikelihood1">(5)</a> is known
+as the likelihood function.</p>
+<p>Similarly, the joint distribution of the function output <span class="math notranslate nohighlight">\(y^*\)</span> at any
+untried input <span class="math notranslate nohighlight">\(\mathbf{x}^*\)</span> and <span class="math notranslate nohighlight">\(\mathbf{y}^{tr}\)</span> follows a
+<span class="math notranslate nohighlight">\((n^{tr}+1)\)</span>-dimensional Gaussian distribution</p>
+<div class="math notranslate nohighlight" id="equation-jointystarytr">
+<span class="eqno">(6)<a class="headerlink" href="#equation-jointystarytr" title="Link to this equation"></a></span>\[\begin{split}p(y^*, \mathbf{y}^{tr} \mid \boldsymbol{\beta}, \sigma^{2}, \boldsymbol{\psi}) \sim \mathcal{N}_{n^{tr}+1}\left(\left[\begin{array}{c}
+\mathbf{h}^T\left(\mathbf{x}^*\right) \\
+\mathbf{H}
+\end{array}\right] \boldsymbol{\beta}, \sigma^{2}\left[\begin{array}{cc}
+c\left(\mathbf{x}^*, \mathbf{x}^*\right) &amp; \mathbf{r}^T\left(\mathbf{x}^*\right) \\
+\mathbf{r}\left(\mathbf{x}^*\right) &amp; \mathbf{R}
+\end{array}\right]\right)\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{r}(\mathbf{x}^*)=\left(c(\mathbf{x}^*, \mathbf{x}_{1}), \ldots, c(\mathbf{x}^*, \mathbf{x}_{n^{tr}}) \right)^T\)</span>.
+According to the property of the multivariate Gaussian distribution, the conditional
+distribution of <span class="math notranslate nohighlight">\(y^*\)</span> conditioned on <span class="math notranslate nohighlight">\(\mathbf{y}^{tr}\)</span> is again a
+Gaussian distribution, namely</p>
+<div class="math notranslate nohighlight" id="equation-conditionalgaussian">
+<span class="eqno">(7)<a class="headerlink" href="#equation-conditionalgaussian" title="Link to this equation"></a></span>\[p(y^* | \mathbf{y}^{tr}, \boldsymbol{\beta}, \sigma^{2}, \boldsymbol{\psi}) \sim  \mathcal{N}
+\left(m', \sigma^2 c' \right),\label{eq:conditionalGaussian}\]</div>
+<div class="math notranslate nohighlight" id="equation-conditionalgaussianm">
+<span class="eqno">(8)<a class="headerlink" href="#equation-conditionalgaussianm" title="Link to this equation"></a></span>\[m'=\mathbf{h}^T(\mathbf{x}^*) \boldsymbol{\beta} + \mathbf{r}^T(\mathbf{x}^*) \mathbf{R}^{-1} (\mathbf{y}^{tr}-\mathbf{H}\boldsymbol{\beta})\]</div>
+<div class="math notranslate nohighlight" id="equation-conditionalgaussianc">
+<span class="eqno">(9)<a class="headerlink" href="#equation-conditionalgaussianc" title="Link to this equation"></a></span>\[c'=c(\mathbf{x}^*, \mathbf{x}^*) - \mathbf{r}^T(\mathbf{x}^*) \mathbf{R}^{-1} \mathbf{r}(\mathbf{x}^*).\]</div>
+<p>Equations <a class="reference internal" href="#equation-conditionalgaussian">(7)</a> to <a class="reference internal" href="#equation-conditionalgaussianc">(9)</a> can be easily
+extended to any dimensionality since the joint distribution of the function
+outputs at any number of untried inputs and <span class="math notranslate nohighlight">\(\mathbf{y}^{tr}\)</span> also follows
+a multivariate Gaussian distribution. Equations <a class="reference internal" href="#equation-conditionalgaussian">(7)</a> to
+<a class="reference internal" href="#equation-conditionalgaussianc">(9)</a> therefore essentially define the posterior which is an
+updated Gaussian process, given the unknown regression parameters
+<span class="math notranslate nohighlight">\(\boldsymbol{\beta}\)</span>, variance <span class="math notranslate nohighlight">\(\sigma^2\)</span>, and correlation length
+parameters <span class="math notranslate nohighlight">\(\boldsymbol{\psi}\)</span>.</p>
+<p>For any new input <span class="math notranslate nohighlight">\(\mathbf{x}^*\)</span>, the output <span class="math notranslate nohighlight">\(y^*\)</span> can be almost
+instantaneously predicted, given by the mean <span class="math notranslate nohighlight">\(m'\)</span>, namely equation
+<a class="reference internal" href="#equation-conditionalgaussianm">(8)</a>. Moreover, the uncertainty associated with the prediction
+can be estimated by for example the variance <span class="math notranslate nohighlight">\(\sigma^2c'\)</span>. Depending on how
+the unknown parameters (<span class="math notranslate nohighlight">\(\boldsymbol{\beta}\)</span>, <span class="math notranslate nohighlight">\(\sigma^2\)</span>, and <span class="math notranslate nohighlight">\(\boldsymbol{\psi}\)</span>)
+are learned based on the training data, the posterior can have various forms, see
+<cite>Section 3.3</cite> of <span id="id5">Zhao [<a class="reference internal" href="../refs.html#id15" title="Hu Zhao. Gaussian processes for sensitivity analysis, Bayesian inference, and uncertainty quantification in landslide research. PhD thesis, RWTH Aachen University, 2021. doi:10.18154/RWTH-2021-11693.">2021</a>]</span>.</p>
+</section>
+<section id="sample-from-gp">
+<h3>Sample from GP<a class="headerlink" href="#sample-from-gp" title="Link to this heading"></a></h3>
+<p>A Gaussian process, either the prior or the posterior, defines a distribution over
+functions. Once its mean function <span class="math notranslate nohighlight">\(m(\cdot)\)</span> and covariance function
+<span class="math notranslate nohighlight">\(C(\cdot,\cdot)\)</span> are specified, the Gaussian process can be evaluated at a
+finite number <span class="math notranslate nohighlight">\(s\)</span> of input points <span class="math notranslate nohighlight">\(\{\mathbf{x}_i\}_{i=1}^{s}\)</span>.
+The joint distribution of <span class="math notranslate nohighlight">\(\{y_i=f(\mathbf{x}_i)\}_{i=1}^{s}\)</span> follows a
+<span class="math notranslate nohighlight">\(s\)</span>-variate Gaussian distribution. A sample of the <span class="math notranslate nohighlight">\(s\)</span>-variate Gaussian
+distribution, denoted as <span class="math notranslate nohighlight">\(\tilde{\mathbf{y}}:=(\tilde{y}_1,\ldots,\tilde{y}_s)^T\)</span>,
+can be viewed as a sample of the Gaussian process (evaluated at a finite number of points).
+To generate <span class="math notranslate nohighlight">\(\tilde{\mathbf{y}}\)</span>, the <span class="math notranslate nohighlight">\(s \times s\)</span> covariance matrix
+<span class="math notranslate nohighlight">\(\boldsymbol{\Sigma}\)</span> needs to be decomposed into the product of a lower triangular
+matrix <span class="math notranslate nohighlight">\(\mathbf{L}\)</span> and its conjugate transpose <span class="math notranslate nohighlight">\(\mathbf{L}^T\)</span> using the Cholesky
+decomposition</p>
+<div class="math notranslate nohighlight" id="equation-choleskydecomposition">
+<span class="eqno">(10)<a class="headerlink" href="#equation-choleskydecomposition" title="Link to this equation"></a></span>\[\begin{split}\boldsymbol{\Sigma}=\left(\begin{array}{cccc}
+C\left(\mathbf{x}_{1}, \mathbf{x}_{1}\right) &amp; C\left(\mathbf{x}_{1}, \mathbf{x}_{2}\right) &amp; \ldots &amp; C\left(\mathbf{x}_{1}, \mathbf{x}_{s}\right) \\
+C\left(\mathbf{x}_{2}, \mathbf{x}_{1}\right) &amp; C\left(\mathbf{x}_{2}, \mathbf{x}_{2}\right) &amp; \ldots &amp; C\left(\mathbf{x}_{2}, \mathbf{x}_{s}\right) \\
+\vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+C\left(\mathbf{x}_{s}, \mathbf{x}_{1}\right) &amp; \ldots &amp; \ldots &amp; C\left(\mathbf{x}_{s}, \mathbf{x}_{s}\right)
+\end{array}\right)=\mathbf{L}\mathbf{L}^T.\end{split}\]</div>
+<p>Then a sample <span class="math notranslate nohighlight">\(\tilde{\mathbf{y}}\)</span> can be obtained as follows:</p>
+<div class="math notranslate nohighlight" id="equation-gpsample">
+<span class="eqno">(11)<a class="headerlink" href="#equation-gpsample" title="Link to this equation"></a></span>\[\tilde{\mathbf{y}} = (m(\mathbf{x}_i),\ldots,m(\mathbf{x}_s))^T + \mathbf{L}\mathbf{w},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{w}:=(w_1,\dots,w_s)^T\)</span> denotes a <span class="math notranslate nohighlight">\(s\)</span>-dimensional random vector
+consisting of <span class="math notranslate nohighlight">\(s\)</span> independent standard normal random variables <span class="math notranslate nohighlight">\(w_i,i \in \{1,\ldots,s\}\)</span>.</p>
+</section>
+</section>
+<section id="scalargasp-class">
+<h2>ScalarGaSP Class<a class="headerlink" href="#scalargasp-class" title="Link to this heading"></a></h2>
+<p>Class <a class="reference internal" href="#psimpy.emulator.robustgasp.ScalarGaSP" title="psimpy.emulator.robustgasp.ScalarGaSP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarGaSP</span></code></a> provides Gaussian process emulation for simulators
+which return a scalar value as output, namely <span class="math notranslate nohighlight">\(y \in \mathbb{R}\)</span>. Please
+refer to <span id="id6">Gu <em>et al.</em> [<a class="reference internal" href="../refs.html#id5" title="Meng Yang Gu, Xiao Jing Wang, and James O. Berger. Robust Gaussian stochastic process emulation. Annals of Statistics, 46(6A):3038–3066, 2018. doi:10.1214/17-AOS1648.">2018</a>]</span> for the detailed theory.</p>
+<p>It is imported by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.emulator.robustgasp</span> <span class="kn">import</span> <span class="n">ScalarGaSP</span>
+</pre></div>
+</div>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="psimpy.emulator.robustgasp.ScalarGaSP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ScalarGaSP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'No'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nugget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nugget_est</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_par</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'post_mode'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_choice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ref_approx'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'matern_5_2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotropic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lbfgs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_initial_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/emulator/robustgasp.html#ScalarGaSP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.emulator.robustgasp.ScalarGaSP" title="Link to this definition"></a></dt>
+<dd><p>Set up basic parameters of the emulator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> (<em>int</em>) – Input parameter dimension.</p></li>
+<li><p><strong>zero_mean</strong> (<em>str</em><em>, </em><em>optional</em>) – If <cite>‘Yes’</cite>, the mean is set to zero. If <cite>‘No’</cite>, the mean is
+specified by <code class="docutils literal notranslate"><span class="pre">trend</span></code>. Default is <cite>‘No’</cite>.</p></li>
+<li><p><strong>nugget</strong> (<em>float</em><em>, </em><em>optional</em>) – Nugget variance ratio.
+If <span class="math notranslate nohighlight">\(0\)</span>, there is no nugget or the nugget is estimated.
+If not <span class="math notranslate nohighlight">\(0\)</span>, it means a fixed nugget. Default is <span class="math notranslate nohighlight">\(0\)</span>.</p></li>
+<li><p><strong>nugget_est</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>True</cite> means <code class="docutils literal notranslate"><span class="pre">nugget</span></code> should be estimated.
+<cite>False</cite> means <code class="docutils literal notranslate"><span class="pre">nugget</span></code> is fixed or not estimated.
+Default is <cite>False</cite>.</p></li>
+<li><p><strong>range_par</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Range parameters. One dimension <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of length
+<code class="docutils literal notranslate"><span class="pre">ndim</span></code>. If given, range parameters are set to the given values
+rather than estimated based on training data.
+By default <cite>NA</cite>, meaning that range parameters are estimated based
+on training data.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Method used for parameter estimation.
+<cite>‘post_mode’</cite>: marginal posterior mode estimation, resulted emulator
+is a Student’s t-process.
+<cite>‘mmle’</cite>: maximum marginal likelihood estimation, resulted emulator
+is a Student’s t-process.
+<cite>‘mle’</cite>: maximum likelihood estimation, resulted emulator is a
+Gaussian process.
+Default is <cite>‘post_mode’</cite>.</p></li>
+<li><p><strong>prior_choice</strong> (<em>str</em><em>, </em><em>optional</em>) – <cite>‘ref_xi’</cite>, <cite>‘ref_gamma’</cite>, or <cite>‘ref_approx’</cite>.
+Default is <cite>‘ref_approx’</cite>.</p></li>
+<li><p><strong>a</strong> (<em>float</em><em>, </em><em>optional</em>) – Prior parameters in the jointly robust prior. Default <span class="math notranslate nohighlight">\(0.2\)</span>.</p></li>
+<li><p><strong>b</strong> (<em>float</em><em>, </em><em>optional</em>) – Prior parameters in the jointly robust prior.
+Default value is <span class="math notranslate nohighlight">\(ntrain^{-1/ndim}(a+ndim)\)</span>, where <code class="docutils literal notranslate"><span class="pre">ntrain</span></code>
+is the number of training input points and <code class="docutils literal notranslate"><span class="pre">ndim</span></code> is input
+parameter dimension.</p></li>
+<li><p><strong>kernel_type</strong> (<em>str</em><em>, </em><em>optional</em>) – <cite>‘matern_3_2’</cite>: Matern correlation with roughness parameter <span class="math notranslate nohighlight">\(3/2\)</span>.
+<cite>‘matern_5_2’</cite>: Matern correlation with roughness parameter <span class="math notranslate nohighlight">\(5/2\)</span>.
+<cite>‘pow_exp’</cite>: power exponential correlation with roughness parameter
+<code class="docutils literal notranslate"><span class="pre">alpha</span></code>.
+Default is <cite>‘matern_5_2’</cite>.</p></li>
+<li><p><strong>isotropic</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>True</cite>: isotropic kernel. <cite>False</cite>: separable kernel.
+Default is <cite>False</cite>.</p></li>
+<li><p><strong>optimization</strong> (<em>str</em><em>, </em><em>optional</em>) – Optimization method for kernel parameters.
+<cite>‘lbfgs’</cite>: low storage version of the Broyden-Fletcher-Goldarb-Shanno
+method.
+<cite>‘nelder-mead’</cite>: Nelder and Mead method.
+<cite>‘brent’</cite>: Brent method for one-dimensional problems.</p></li>
+<li><p><strong>alpha</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Roughness parameters in the <cite>‘pow_exp’</cite> correlation functions. One
+dimension <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of length <code class="docutils literal notranslate"><span class="pre">ndim</span></code>.
+Default is a one dimension array with each entry being <span class="math notranslate nohighlight">\(1.9\)</span>.</p></li>
+<li><p><strong>lower_bound</strong> (<em>bool</em>) – <cite>True</cite>: the default lower bounds of the inverse range parameters are
+used to constrain the optimization.
+<cite>False</cite>: the optimization is unconstrained.
+Default is <cite>True</cite>.</p></li>
+<li><p><strong>max_eval</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of steps to estimate the range and nugget parameters.
+Default is <span class="math notranslate nohighlight">\(max(30,20+5*ndim)\)</span>.</p></li>
+<li><p><strong>num_initial_values</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of initial values of the kernel parameters in optimization.
+Default is <span class="math notranslate nohighlight">\(2\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.emulator.robustgasp.ScalarGaSP.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/emulator/robustgasp.html#ScalarGaSP.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.emulator.robustgasp.ScalarGaSP.train" title="Link to this definition"></a></dt>
+<dd><p>Train a scalar GP given training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>design</strong> (<em>numpy array</em>) – Training input points. Shape <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">ndim)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">ntrain</span></code> is the number of training points, <code class="docutils literal notranslate"><span class="pre">ndim</span></code> is the input
+dimension. If <span class="math notranslate nohighlight">\(ndim=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">1)</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">(ntrain,)</span></code> <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+<li><p><strong>response</strong> (<em>numpy array</em>) – Training output points. Shape <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">1)</span></code> or
+<code class="code docutils literal notranslate"><span class="pre">(ntrain,)</span></code>.</p></li>
+<li><p><strong>trend</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Basis function matrix. Shape <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">q)</span></code>.
+If <cite>None</cite>, a <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">1)</span></code> matrix of ones is used.
+If <span class="math notranslate nohighlight">\(q=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">1)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(ntrain,)</span></code>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+<li><p><strong>verbose</strong> (<em>bool</em><em>, </em><em>optional</em>) – If <cite>‘True’</cite>, Displays detailed information.
+Default is <cite>True</cite>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.emulator.robustgasp.ScalarGaSP.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">testing_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testing_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/emulator/robustgasp.html#ScalarGaSP.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.emulator.robustgasp.ScalarGaSP.predict" title="Link to this definition"></a></dt>
+<dd><p>Make prediction using the trained scalar GP emulator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testing_input</strong> (<em>numpy array</em>) – Input points at which to make prediction. Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">ndim)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">ntest</span></code> is the number of input points and <code class="docutils literal notranslate"><span class="pre">ndim</span></code> is the
+input dimension. If <span class="math notranslate nohighlight">\(ndim=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">(ntest,)</span></code> <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+<li><p><strong>testing_trend</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Basis function matrix corresponds to <code class="docutils literal notranslate"><span class="pre">testing_input</span></code>.
+Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">q)</span></code>. By default <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> matrix of ones.
+If <span class="math notranslate nohighlight">\(q=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(ntest,)</span></code>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>predictions</strong> – Emulator-prediction at <code class="docutils literal notranslate"><span class="pre">testing_input</span></code>. Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">4)</span></code>.
+<cite>predictions[:, 0]</cite> - mean,
+<cite>predictions[:, 1]</cite> - low95,
+<cite>predictions[:, 2]</cite> - upper95,
+<cite>predictions[:, 3]</cite> - sd</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.emulator.robustgasp.ScalarGaSP.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">testing_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsamples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testing_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/emulator/robustgasp.html#ScalarGaSP.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.emulator.robustgasp.ScalarGaSP.sample" title="Link to this definition"></a></dt>
+<dd><p>Draw samples using the trained scalar GP emulator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testing_input</strong> (<em>numpy array</em>) – Input points at which to draw samples. Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">ndim)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">ntest</span></code> is the number of input points and <code class="docutils literal notranslate"><span class="pre">ndim</span></code> is the input
+dimension. If <span class="math notranslate nohighlight">\(ndim=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">(ntest,)</span></code> <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+<li><p><strong>nsamples</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of samples to be drawn.</p></li>
+<li><p><strong>testing_trend</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Basis function matrix corresponds to <code class="docutils literal notranslate"><span class="pre">testing_input</span></code>.
+Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">q)</span></code>. By default <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> matrix of ones.
+If <span class="math notranslate nohighlight">\(q=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(ntest,)</span></code>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>samples</strong> – Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">nsamples)</span></code>. Each column contains one realization
+of the trained emulator at <code class="docutils literal notranslate"><span class="pre">testing_input</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.emulator.robustgasp.ScalarGaSP.loo_validate">
+<span class="sig-name descname"><span class="pre">loo_validate</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/emulator/robustgasp.html#ScalarGaSP.loo_validate"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.emulator.robustgasp.ScalarGaSP.loo_validate" title="Link to this definition"></a></dt>
+<dd><p>Validate trained scalar GP emulator using leave-one-out-cross-validation.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>validation</strong> – Shape <code class="code docutils literal notranslate"><span class="pre">(n,</span> <span class="pre">2)</span></code>.
+validation[:, 0] - leave-one-out fitted values
+validation[:, 1] - standard deviation of each prediction</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="ppgasp-class">
+<h2>PPGaSP Class<a class="headerlink" href="#ppgasp-class" title="Link to this heading"></a></h2>
+<p>Class <a class="reference internal" href="#psimpy.emulator.robustgasp.PPGaSP" title="psimpy.emulator.robustgasp.PPGaSP"><code class="xref py py-class docutils literal notranslate"><span class="pre">PPGaSP</span></code></a> provides Gaussian process emulation for simulators
+which return multiple values as output, namely <span class="math notranslate nohighlight">\(y \in \mathbb{R}^k, k&gt;1\)</span>.
+Please refer to <span id="id7">Gu and Berger [<a class="reference internal" href="../refs.html#id4" title="Meng Yang Gu and James O. Berger. Parallel partial Gaussian process emulation for computer models with massive output. Annals of Applied Statistics, 10(3):1317–1347, 2016. doi:10.1214/16-AOAS934.">2016</a>]</span> for the detailed theory.</p>
+<p>It is imported by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.emulator.robustgasp</span> <span class="kn">import</span> <span class="n">PPGaSP</span>
+</pre></div>
+</div>
+<section id="id8">
+<h3>Methods<a class="headerlink" href="#id8" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="psimpy.emulator.robustgasp.PPGaSP">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">PPGaSP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">zero_mean</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'No'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nugget</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nugget_est</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">range_par</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">NA</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">method</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'post_mode'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior_choice</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'ref_approx'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.2</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">b</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kernel_type</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'matern_5_2'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">isotropic</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimization</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'lbfgs'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">alpha</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lower_bound</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_eval</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_initial_values</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/emulator/robustgasp.html#PPGaSP"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.emulator.robustgasp.PPGaSP" title="Link to this definition"></a></dt>
+<dd><p>Set up basic parameters of the emulator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> (<em>int</em>) – Input parameter dimension.</p></li>
+<li><p><strong>zero_mean</strong> (<em>str</em><em>, </em><em>optional</em>) – If <cite>‘Yes’</cite>, the mean is set to zero. If <cite>‘No’</cite>, the mean is
+specified by <code class="docutils literal notranslate"><span class="pre">trend</span></code>. Default is <cite>‘No’</cite>.</p></li>
+<li><p><strong>nugget</strong> (<em>float</em><em>, </em><em>optional</em>) – Nugget variance ratio.
+If <span class="math notranslate nohighlight">\(0\)</span>, there is no nugget or the nugget is estimated.
+If not <span class="math notranslate nohighlight">\(0\)</span>, it means a fixed nugget. Default is <span class="math notranslate nohighlight">\(0\)</span>.</p></li>
+<li><p><strong>nugget_est</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>True</cite> means <code class="docutils literal notranslate"><span class="pre">nugget</span></code> should be estimated.
+<cite>False</cite> means <code class="docutils literal notranslate"><span class="pre">nugget</span></code> is fixed or not estimated.
+Default is <cite>False</cite>.</p></li>
+<li><p><strong>range_par</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Range parameters. One dimension <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of length
+<code class="docutils literal notranslate"><span class="pre">ndim</span></code>. If given, range parameters are set to the given values
+rather than estimated based on training data.
+By default <cite>NA</cite>, meaning that range parameters are estimated based
+on training data.</p></li>
+<li><p><strong>method</strong> (<em>str</em><em>, </em><em>optional</em>) – Method used for parameter estimation.
+<cite>‘post_mode’</cite>: marginal posterior mode estimation, resulted emulator
+is a Student’s t-process.
+<cite>‘mmle’</cite>: maximum marginal likelihood estimation, resulted emulator
+is a Student’s t-process.
+<cite>‘mle’</cite>: maximum likelihood estimation, resulted emulator is a
+Gaussian process.
+Default is <cite>‘post_mode’</cite>.</p></li>
+<li><p><strong>prior_choice</strong> (<em>str</em><em>, </em><em>optional</em>) – <cite>‘ref_xi’</cite>, <cite>‘ref_gamma’</cite>, or <cite>‘ref_approx’</cite>.
+Default is <cite>‘ref_approx’</cite>.</p></li>
+<li><p><strong>a</strong> (<em>float</em><em>, </em><em>optional</em>) – Prior parameters in the jointly robust prior. Default <span class="math notranslate nohighlight">\(0.2\)</span>.</p></li>
+<li><p><strong>b</strong> (<em>float</em><em>, </em><em>optional</em>) – Prior parameters in the jointly robust prior.
+Default value is <span class="math notranslate nohighlight">\(ntrain^{-1/ndim}(a+ndim)\)</span>, where <code class="docutils literal notranslate"><span class="pre">ntrain</span></code>
+is the number of training input points and <code class="docutils literal notranslate"><span class="pre">ndim</span></code> is input
+parameter dimension.</p></li>
+<li><p><strong>kernel_type</strong> (<em>str</em><em>, </em><em>optional</em>) – <cite>‘matern_3_2’</cite>: Matern correlation with roughness parameter <span class="math notranslate nohighlight">\(3/2\)</span>.
+<cite>‘matern_5_2’</cite>: Matern correlation with roughness parameter <span class="math notranslate nohighlight">\(5/2\)</span>.
+<cite>‘pow_exp’</cite>: power exponential correlation with roughness parameter
+<code class="docutils literal notranslate"><span class="pre">alpha</span></code>.
+Default is <cite>‘matern_5_2’</cite>.</p></li>
+<li><p><strong>isotropic</strong> (<em>bool</em><em>, </em><em>optional</em>) – <cite>True</cite>: isotropic kernel. <cite>False</cite>: separable kernel.
+Default is <cite>False</cite>.</p></li>
+<li><p><strong>optimization</strong> (<em>str</em><em>, </em><em>optional</em>) – Optimization method for kernel parameters.
+<cite>‘lbfgs’</cite>: low storage version of the Broyden-Fletcher-Goldarb-Shanno
+method.
+<cite>‘nelder-mead’</cite>: Nelder and Mead method.
+<cite>‘brent’</cite>: Brent method for one-dimensional problems.</p></li>
+<li><p><strong>alpha</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Roughness parameters in the <cite>‘pow_exp’</cite> correlation functions. One
+dimension <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of length <code class="docutils literal notranslate"><span class="pre">ndim</span></code>.
+Default is a one dimension array with each entry being <span class="math notranslate nohighlight">\(1.9\)</span>.</p></li>
+<li><p><strong>lower_bound</strong> (<em>bool</em>) – <cite>True</cite>: the default lower bounds of the inverse range parameters are
+used to constrain the optimization.
+<cite>False</cite>: the optimization is unconstrained.
+Default is <cite>True</cite>.</p></li>
+<li><p><strong>max_eval</strong> (<em>int</em><em>, </em><em>optional</em>) – Maximum number of steps to estimate the range and nugget parameters.
+Default is <span class="math notranslate nohighlight">\(max(30,20+5*ndim)\)</span>.</p></li>
+<li><p><strong>num_initial_values</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of initial values of the kernel parameters in optimization.
+Default is <span class="math notranslate nohighlight">\(2\)</span>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.emulator.robustgasp.PPGaSP.train">
+<span class="sig-name descname"><span class="pre">train</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">design</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">response</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/emulator/robustgasp.html#PPGaSP.train"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.emulator.robustgasp.PPGaSP.train" title="Link to this definition"></a></dt>
+<dd><p>Train a parallel partial GP given training data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>design</strong> (<em>numpy array</em>) – Training input points. Shape <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">ndim)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">ntrain</span></code> is the number of training points, <code class="docutils literal notranslate"><span class="pre">ndim</span></code> is the input
+dimension. If <span class="math notranslate nohighlight">\(ndim=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ndim,</span> <span class="pre">1)</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">(ndim,)</span></code> <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+<li><p><strong>response</strong> (<em>numpy array</em>) – Training output points. Shape <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">nresponse)</span></code>,
+<span class="math notranslate nohighlight">\(nresponse&gt;1\)</span>.</p></li>
+<li><p><strong>trend</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Basis function matrix. Shape <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">q)</span></code>.
+If <cite>None</cite>, a <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">1)</span></code> matrix of ones is used.
+If <span class="math notranslate nohighlight">\(q=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntrain,</span> <span class="pre">1)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(ntrain,)</span></code>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-obj docutils literal notranslate"><span class="pre">None</span></code></span></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.emulator.robustgasp.PPGaSP.predict">
+<span class="sig-name descname"><span class="pre">predict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">testing_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testing_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/emulator/robustgasp.html#PPGaSP.predict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.emulator.robustgasp.PPGaSP.predict" title="Link to this definition"></a></dt>
+<dd><p>Make prediction using the trained parallel partial GP emulator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testing_input</strong> (<em>numpy array</em>) – Input points at which to make prediction. Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">ndim)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">ntest</span></code> is the number of input points and <code class="docutils literal notranslate"><span class="pre">ndim</span></code> is the input
+dimension. If <span class="math notranslate nohighlight">\(ndim=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">(ntest,)</span></code> <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+<li><p><strong>testing_trend</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Basis function matrix corresponds to <code class="docutils literal notranslate"><span class="pre">testing_input</span></code>.
+Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">q)</span></code>. By default <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> matrix of ones.
+If <span class="math notranslate nohighlight">\(q=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(ntest,)</span></code>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>predictions</strong> – Emulator-prediction at <code class="docutils literal notranslate"><span class="pre">testing_input</span></code>.
+Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">nresponse,</span> <span class="pre">4)</span></code>.
+<cite>predictions[:, :, 0]</cite> - mean,
+<cite>predictions[:, :, 1]</cite> - low95,
+<cite>predictions[:, :, 2]</cite> - upper95,
+<cite>predictions[:, :, 3]</cite> - sd</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.emulator.robustgasp.PPGaSP.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">testing_input</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nsamples</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">testing_trend</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/emulator/robustgasp.html#PPGaSP.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.emulator.robustgasp.PPGaSP.sample" title="Link to this definition"></a></dt>
+<dd><p>Draw samples using the trained parallel partial GaSP emulator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>testing_input</strong> (<em>numpy array</em>) – Input point at which to draw samples. Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">ndim)</span></code>.
+<code class="docutils literal notranslate"><span class="pre">ntest</span></code> is the number of input points and <code class="docutils literal notranslate"><span class="pre">ndim</span></code> is the input
+dimension. If <span class="math notranslate nohighlight">\(ndim=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> and
+<code class="code docutils literal notranslate"><span class="pre">(ntest,)</span></code> <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+<li><p><strong>nsamples</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of samples to be drawn.</p></li>
+<li><p><strong>testing_trend</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Basis function matrix corresponds to <code class="docutils literal notranslate"><span class="pre">testing_input</span></code>.
+Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">q)</span></code>. By default <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> matrix of ones.
+If <span class="math notranslate nohighlight">\(q=1\)</span>, both <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">1)</span></code> and <code class="code docutils literal notranslate"><span class="pre">(ntest,)</span></code>
+<code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> are valid.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p><strong>samples</strong> – Shape <code class="code docutils literal notranslate"><span class="pre">(ntest,</span> <span class="pre">nresponse,</span> <span class="pre">nsamples)</span></code>.
+<cite>samples[:, :, i]</cite> corresponds to i-th realization of the trained
+emulator at <code class="docutils literal notranslate"><span class="pre">testing_input</span></code>, i=1, …, <code class="docutils literal notranslate"><span class="pre">nsamples</span></code>.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>numpy array</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Emulator" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../inference/index.html" class="btn btn-neutral float-right" title="Inference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

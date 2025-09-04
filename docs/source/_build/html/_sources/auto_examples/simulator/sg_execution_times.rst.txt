@@ -1,0 +1,18 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_simulator_sg_execution_times:
+
+Computation times
+=================
+**02:23.137** total execution time for **auto_examples_simulator** files:
+
++---------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_simulator_plot_run_ravaflow3G.py` (``plot_run_ravaflow3G.py``)             | 01:18.603 | 0.0 MB |
++---------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_simulator_plot_ravaflow3G.py` (``plot_ravaflow3G.py``)                     | 01:04.534 | 0.0 MB |
++---------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_simulator_plot_mass_point_model.py` (``plot_mass_point_model.py``)         | 00:00.000 | 0.0 MB |
++---------------------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_simulator_plot_run_mass_point_model.py` (``plot_run_mass_point_model.py``) | 00:00.000 | 0.0 MB |
++---------------------------------------------------------------------------------------------------------+-----------+--------+

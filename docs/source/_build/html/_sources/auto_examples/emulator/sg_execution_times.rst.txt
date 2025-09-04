@@ -1,0 +1,14 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_emulator_sg_execution_times:
+
+Computation times
+=================
+**00:05.286** total execution time for **auto_examples_emulator** files:
+
++------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_emulator_plot_ppgasp.py` (``plot_ppgasp.py``)         | 00:04.728 | 0.0 MB |
++------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_emulator_plot_scalargasp.py` (``plot_scalargasp.py``) | 00:00.558 | 0.0 MB |
++------------------------------------------------------------------------------------+-----------+--------+

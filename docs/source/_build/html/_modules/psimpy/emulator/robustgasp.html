@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>psimpy.emulator.robustgasp &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API &amp; Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">psimpy.emulator.robustgasp</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for psimpy.emulator.robustgasp</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+
+<span class="k">if</span> <span class="s2">&quot;CONDA_PREFIX&quot;</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span> <span class="ow">and</span> <span class="s2">&quot;R_HOME&quot;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">:</span>
+    <span class="c1"># if a conda environment is active and the R_HOME variable was not set</span>
+    <span class="n">R_home</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s2">&quot;CONDA_PREFIX&quot;</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;/lib/R&#39;</span>
+    <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">R_home</span><span class="p">):</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">environ</span><span class="p">[</span><span class="s1">&#39;R_HOME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">R_home</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">rpy2.robjects.packages</span> <span class="kn">import</span> <span class="n">importr</span>
+<span class="kn">import</span> <span class="nn">rpy2.robjects.numpy2ri</span>
+<span class="kn">from</span> <span class="nn">rpy2.rinterface</span> <span class="kn">import</span> <span class="n">NA</span>
+<span class="kn">from</span> <span class="nn">rpy2.rinterface_lib.sexp</span> <span class="kn">import</span> <span class="n">NALogicalType</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">beartype</span> <span class="kn">import</span> <span class="n">beartype</span>
+<span class="kn">from</span> <span class="nn">sklearn.model_selection</span> <span class="kn">import</span> <span class="n">RepeatedKFold</span>
+<span class="kn">from</span> <span class="nn">contextlib</span> <span class="kn">import</span> <span class="n">nullcontext</span><span class="p">,</span> <span class="n">contextmanager</span>
+<span class="kn">from</span> <span class="nn">sklearn.metrics</span> <span class="kn">import</span> <span class="n">mean_absolute_percentage_error</span><span class="p">,</span> <span class="n">r2_score</span><span class="p">,</span> <span class="n">root_mean_squared_error</span>
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+
+<span class="n">rpy2</span><span class="o">.</span><span class="n">robjects</span><span class="o">.</span><span class="n">numpy2ri</span><span class="o">.</span><span class="n">activate</span><span class="p">()</span>
+<span class="n">RobustGaSP</span> <span class="o">=</span> <span class="n">importr</span><span class="p">(</span><span class="s2">&quot;RobustGaSP&quot;</span><span class="p">)</span>
+
+<span class="c1"># fetch @</span>
+<span class="n">r_base</span> <span class="o">=</span> <span class="n">importr</span><span class="p">(</span><span class="s2">&quot;base&quot;</span><span class="p">)</span>
+<span class="n">r_at</span> <span class="o">=</span> <span class="n">r_base</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s2">&quot;@&quot;</span><span class="p">]</span>
+
+
+<span class="k">class</span> <span class="nc">RobustGaSPBase</span><span class="p">:</span>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">ndim</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">zero_mean</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;No&quot;</span><span class="p">,</span>
+        <span class="n">nugget</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">nugget_est</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">range_par</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">NALogicalType</span><span class="p">]</span> <span class="o">=</span> <span class="n">NA</span><span class="p">,</span>
+        <span class="n">method</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;post_mode&quot;</span><span class="p">,</span>
+        <span class="n">prior_choice</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;ref_approx&quot;</span><span class="p">,</span>
+        <span class="n">a</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.2</span><span class="p">,</span>
+        <span class="n">b</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">kernel_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;matern_5_2&quot;</span><span class="p">,</span>
+        <span class="n">isotropic</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">optimization</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;lbfgs&quot;</span><span class="p">,</span>
+        <span class="n">alpha</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">lower_bound</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">max_eval</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">num_initial_values</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">2</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Set up basic parameters of the emulator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        ndim : int</span>
+<span class="sd">            Input parameter dimension.</span>
+<span class="sd">        zero_mean : str, optional</span>
+<span class="sd">            If `&#39;Yes&#39;`, the mean is set to zero. If `&#39;No&#39;`, the mean is</span>
+<span class="sd">            specified by ``trend``. Default is `&#39;No&#39;`.</span>
+<span class="sd">        nugget : float, optional</span>
+<span class="sd">            Nugget variance ratio.</span>
+<span class="sd">            If :math:`0`, there is no nugget or the nugget is estimated.</span>
+<span class="sd">            If not :math:`0`, it means a fixed nugget. Default is :math:`0`.</span>
+<span class="sd">        nugget_est : bool, optional</span>
+<span class="sd">            `True` means ``nugget`` should be estimated.</span>
+<span class="sd">            `False` means ``nugget`` is fixed or not estimated.</span>
+<span class="sd">            Default is `False`.</span>
+<span class="sd">        range_par : numpy array, optional</span>
+<span class="sd">            Range parameters. One dimension :class:`numpy.ndarray` of length</span>
+<span class="sd">            ``ndim``. If given, range parameters are set to the given values</span>
+<span class="sd">            rather than estimated based on training data.</span>
+<span class="sd">            By default `NA`, meaning that range parameters are estimated based</span>
+<span class="sd">            on training data.</span>
+<span class="sd">        method : str, optional</span>
+<span class="sd">            Method used for parameter estimation.</span>
+<span class="sd">            `&#39;post_mode&#39;`: marginal posterior mode estimation, resulted emulator</span>
+<span class="sd">            is a Student&#39;s t-process.</span>
+<span class="sd">            `&#39;mmle&#39;`: maximum marginal likelihood estimation, resulted emulator</span>
+<span class="sd">            is a Student&#39;s t-process.</span>
+<span class="sd">            `&#39;mle&#39;`: maximum likelihood estimation, resulted emulator is a</span>
+<span class="sd">            Gaussian process.</span>
+<span class="sd">            Default is `&#39;post_mode&#39;`.</span>
+<span class="sd">        prior_choice : str, optional</span>
+<span class="sd">            `&#39;ref_xi&#39;`, `&#39;ref_gamma&#39;`, or `&#39;ref_approx&#39;`.</span>
+<span class="sd">            Default is `&#39;ref_approx&#39;`.</span>
+<span class="sd">        a : float, optional</span>
+<span class="sd">            Prior parameters in the jointly robust prior. Default :math:`0.2`.</span>
+<span class="sd">        b : float, optional</span>
+<span class="sd">            Prior parameters in the jointly robust prior.</span>
+<span class="sd">            Default value is :math:`ntrain^{-1/ndim}(a+ndim)`, where ``ntrain``</span>
+<span class="sd">            is the number of training input points and ``ndim`` is input</span>
+<span class="sd">            parameter dimension.</span>
+<span class="sd">        kernel_type : str, optional</span>
+<span class="sd">            `&#39;matern_3_2&#39;`: Matern correlation with roughness parameter :math:`3/2`.</span>
+<span class="sd">            `&#39;matern_5_2&#39;`: Matern correlation with roughness parameter :math:`5/2`.</span>
+<span class="sd">            `&#39;pow_exp&#39;`: power exponential correlation with roughness parameter</span>
+<span class="sd">            ``alpha``.</span>
+<span class="sd">            Default is `&#39;matern_5_2&#39;`.</span>
+<span class="sd">        isotropic : bool, optional</span>
+<span class="sd">            `True`: isotropic kernel. `False`: separable kernel.</span>
+<span class="sd">            Default is `False`.</span>
+<span class="sd">        optimization : str, optional</span>
+<span class="sd">            Optimization method for kernel parameters.</span>
+<span class="sd">            `&#39;lbfgs&#39;`: low storage version of the Broyden-Fletcher-Goldarb-Shanno</span>
+<span class="sd">            method.</span>
+<span class="sd">            `&#39;nelder-mead&#39;`: Nelder and Mead method.</span>
+<span class="sd">            `&#39;brent&#39;`: Brent method for one-dimensional problems.</span>
+<span class="sd">        alpha : numpy array, optional</span>
+<span class="sd">            Roughness parameters in the `&#39;pow_exp&#39;` correlation functions. One</span>
+<span class="sd">            dimension :class:`numpy.ndarray` of length ``ndim``.</span>
+<span class="sd">            Default is a one dimension array with each entry being :math:`1.9`.</span>
+<span class="sd">        lower_bound : bool</span>
+<span class="sd">            `True`: the default lower bounds of the inverse range parameters are</span>
+<span class="sd">            used to constrain the optimization.</span>
+<span class="sd">            `False`: the optimization is unconstrained.</span>
+<span class="sd">            Default is `True`.</span>
+<span class="sd">        max_eval : int, optional</span>
+<span class="sd">            Maximum number of steps to estimate the range and nugget parameters.</span>
+<span class="sd">            Default is :math:`max(30,20+5*ndim)`.</span>
+<span class="sd">        num_initial_values : int, optional</span>
+<span class="sd">            Number of initial values of the kernel parameters in optimization.</span>
+<span class="sd">            Default is :math:`2`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span> <span class="o">=</span> <span class="n">ndim</span>
+
+        <span class="k">if</span> <span class="n">zero_mean</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;No&quot;</span><span class="p">,</span> <span class="s2">&quot;Yes&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;zero_mean can be either &#39;No&#39; or &#39;Yes&#39;.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">zero_mean</span> <span class="o">=</span> <span class="n">zero_mean</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">nugget</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">nugget</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">nugget_est</span> <span class="o">=</span> <span class="n">nugget_est</span>
+
+        <span class="k">if</span> <span class="n">range_par</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">NA</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">range_par</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">range_par</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ndim</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;range_par must be 1d numpy array of length ndim&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">range_par</span> <span class="o">=</span> <span class="n">range_par</span>
+
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;post_mode&quot;</span><span class="p">,</span> <span class="s2">&quot;mmle&quot;</span><span class="p">,</span> <span class="s2">&quot;mle&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;method can only be &#39;post_mode&#39;, &#39;mmle&#39;, or &#39;mle&#39;.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
+
+        <span class="k">if</span> <span class="n">prior_choice</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;ref_xi&quot;</span><span class="p">,</span> <span class="s2">&quot;ref_gamma&quot;</span><span class="p">,</span> <span class="s2">&quot;ref_approx&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;prior_choice can only be &#39;ref_xi&#39;, &#39;ref_gamma&#39;,&quot;</span> <span class="s2">&quot; or &#39;ref_approx&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">prior_choice</span> <span class="o">=</span> <span class="n">prior_choice</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="o">=</span> <span class="n">b</span>
+
+        <span class="k">if</span> <span class="n">kernel_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;matern_3_2&quot;</span><span class="p">,</span> <span class="s2">&quot;matern_5_2&quot;</span><span class="p">,</span> <span class="s2">&quot;pow_exp&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;kernel_type can only be &#39;matern_3_2&#39;, &#39;matern_5_2&#39;,&quot;</span> <span class="s2">&quot; or &#39;pow_exp&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">kernel_type</span> <span class="o">=</span> <span class="n">kernel_type</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">isotropic</span> <span class="o">=</span> <span class="n">isotropic</span>
+
+        <span class="k">if</span> <span class="n">optimization</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;lbfgs&quot;</span><span class="p">,</span> <span class="s2">&quot;nelder-mead&quot;</span><span class="p">,</span> <span class="s2">&quot;brent&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;optimization can only be &#39;lbfgs&#39;, &#39;nelder-mead&#39;, or &#39;brent&#39;.&quot;</span>
+            <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">optimization</span> <span class="o">=</span> <span class="n">optimization</span>
+
+        <span class="k">if</span> <span class="n">alpha</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">alpha</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">ndim</span><span class="p">)</span> <span class="o">*</span> <span class="mf">1.9</span>
+        <span class="k">elif</span> <span class="n">alpha</span><span class="o">.</span><span class="n">ndim</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">alpha</span><span class="p">)</span> <span class="o">!=</span> <span class="n">ndim</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;alpha must be 1d numpy array of length ndim&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">alpha</span> <span class="o">=</span> <span class="n">alpha</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span> <span class="o">=</span> <span class="n">lower_bound</span>
+
+        <span class="k">if</span> <span class="n">max_eval</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">max_eval</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="nb">max</span><span class="p">(</span><span class="mi">30</span><span class="p">,</span> <span class="mi">20</span> <span class="o">+</span> <span class="mi">5</span> <span class="o">*</span> <span class="n">ndim</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">max_eval</span> <span class="o">=</span> <span class="n">max_eval</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">num_initial_values</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">num_initial_values</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="nf">_preprocess_design_response_trend</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">design</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">response</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">trend</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Preprocess design, response, and trend before train an emulator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        design : numpy array</span>
+<span class="sd">            Training input points. Shape :code:`(ntrain, ndim)`.</span>
+<span class="sd">            ``ntrain`` is the number of training points, ``ndim`` is the input</span>
+<span class="sd">            dimension. If :math:`ndim=1`, both :code:`(ntrain, 1)` and</span>
+<span class="sd">            :code:`(ntrain,)` :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        response : numpy array</span>
+<span class="sd">            Training output points. Shape :code:`(ntrain, nresponse)`.</span>
+<span class="sd">            ``nresponse`` is the number of QoIs of a single simulation.</span>
+<span class="sd">            ``ntrain`` output points corresponding to ``design``.</span>
+<span class="sd">            For child class :class:`.ScalarGaSP`, :math:`nresponse=1`.</span>
+<span class="sd">            For child class :class:`.PPGaSP`, :math:`nresponse&gt;1`.</span>
+<span class="sd">        trend : numpy array</span>
+<span class="sd">            Basis function matrix. Shape :code:`(ntrain, q)`.</span>
+<span class="sd">            If `None`, a :code:`(ntrain, 1)` matrix of ones is used.</span>
+<span class="sd">            If :math:`q=1`, both :code:`(ntrain, 1)` and :code:`(ntrain,)`</span>
+<span class="sd">            :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">design</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">design</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;design must be 1d or 2d numpy array.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">design</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">design</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">design</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;design must match the input dimension ndim&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">design</span> <span class="o">=</span> <span class="n">design</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">response</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;response must be 1d or 2d numpy array.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">response</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">response</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">response</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;response must have same number of points as design&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">response</span> <span class="o">=</span> <span class="n">response</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">trend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="n">trend</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">trend</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;trend must be 1d or 2d numpy array.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">trend</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">trend</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">trend</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">trend</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;trend must have same numer of points as design&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">trend</span> <span class="o">=</span> <span class="n">trend</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zero_mean</span> <span class="o">==</span> <span class="s2">&quot;Yes&quot;</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">),</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">**</span> <span class="p">(</span><span class="mi">1</span> <span class="o">/</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">*</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">a</span> <span class="o">+</span> <span class="n">design</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_b</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">b</span>
+
+    <span class="k">def</span> <span class="nf">_preprocess_testing_input_trend</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">testing_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">testing_trend</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Preprocess testing_input and testing_trend before make prediction or</span>
+<span class="sd">        draw samples.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        testing_input : numpy array</span>
+<span class="sd">            Input matrix to make prediction or draw samples.</span>
+<span class="sd">            Shape :code:`(ntest, ndim)`.</span>
+<span class="sd">            If :math:`ndim=1`, both :code:`(ntest, 1)` and :code:`(ntest,)`</span>
+<span class="sd">            :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        testing_trend : numpy array</span>
+<span class="sd">            Basis function matrix corresponds to ``testing_input``.</span>
+<span class="sd">            Shape :code:`(ntest, q)`.</span>
+<span class="sd">            By default :code:`(ntest, 1)` matrix of ones.</span>
+<span class="sd">            If :math:`q=1`, both :code:`(ntest, 1)` and :code:`(ntest,)`</span>
+<span class="sd">            :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">testing_input</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">testing_input</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;testing_input must be 1d or 2d numpy array.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">testing_input</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">testing_input</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">testing_input</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">testing_input</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="k">if</span> <span class="n">testing_input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ndim</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;testing_input must match the input dimension ndim&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">testing_input</span> <span class="o">=</span> <span class="n">testing_input</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">zero_mean</span> <span class="o">==</span> <span class="s2">&quot;Yes&quot;</span><span class="p">:</span>
+            <span class="n">testing_trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">testing_input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="n">testing_trend</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">testing_trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">((</span><span class="n">testing_input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="p">(</span><span class="n">testing_trend</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">testing_trend</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;testing_trend must be 1d or 2d numpy array.&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">testing_trend</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">testing_trend</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">testing_trend</span><span class="p">,</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">testing_trend</span><span class="p">),</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">testing_trend</span> <span class="o">=</span> <span class="n">testing_trend</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">testing_trend</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">testing_input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;testing_trend must have same numer of points as testing_input&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">testing_trend</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trend</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;testing_trend must have the same basis as the trend used&quot;</span>
+                <span class="s2">&quot; for emulator training.&quot;</span>
+            <span class="p">)</span>
+
+    <span class="nd">@contextmanager</span>
+    <span class="k">def</span> <span class="nf">_nostdout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Discard any output to the standard output stream (stdout).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">save_stdout</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">io</span><span class="o">.</span><span class="n">StringIO</span><span class="p">()</span>
+        <span class="k">yield</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">stdout</span> <span class="o">=</span> <span class="n">save_stdout</span>
+
+
+<div class="viewcode-block" id="ScalarGaSP">
+<a class="viewcode-back" href="../../../emulator/robustgasp.html#psimpy.emulator.robustgasp.ScalarGaSP">[docs]</a>
+<span class="k">class</span> <span class="nc">ScalarGaSP</span><span class="p">(</span><span class="n">RobustGaSPBase</span><span class="p">):</span>
+<div class="viewcode-block" id="ScalarGaSP.train">
+<a class="viewcode-back" href="../../../emulator/robustgasp.html#psimpy.emulator.robustgasp.ScalarGaSP.train">[docs]</a>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">design</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">trend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">verbose</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Train a scalar GP given training data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        design : numpy array</span>
+<span class="sd">            Training input points. Shape :code:`(ntrain, ndim)`.</span>
+<span class="sd">            ``ntrain`` is the number of training points, ``ndim`` is the input</span>
+<span class="sd">            dimension. If :math:`ndim=1`, both :code:`(ntrain, 1)` and</span>
+<span class="sd">            :code:`(ntrain,)` :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        response : numpy array</span>
+<span class="sd">            Training output points. Shape :code:`(ntrain, 1)` or</span>
+<span class="sd">            :code:`(ntrain,)`.</span>
+<span class="sd">        trend : numpy array, optional</span>
+<span class="sd">            Basis function matrix. Shape :code:`(ntrain, q)`.</span>
+<span class="sd">            If `None`, a :code:`(ntrain, 1)` matrix of ones is used.</span>
+<span class="sd">            If :math:`q=1`, both :code:`(ntrain, 1)` and :code:`(ntrain,)`</span>
+<span class="sd">            :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        verbose : bool, optional</span>
+<span class="sd">            If `&#39;True&#39;`, Displays detailed information.</span>
+<span class="sd">            Default is `True`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_design_response_trend</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">trend</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;ScalarGaSP only works for scalar-output model&quot;</span><span class="p">)</span>
+
+        <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nostdout</span><span class="p">()</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">verbose</span> <span class="k">else</span> <span class="n">nullcontext</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span> <span class="o">=</span> <span class="n">RobustGaSP</span><span class="o">.</span><span class="n">rgasp</span><span class="p">(</span>
+                <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
+                <span class="n">response</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="p">,</span>
+                <span class="n">trend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trend</span><span class="p">,</span>
+                <span class="n">nugget</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nugget</span><span class="p">,</span>
+                <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+                <span class="n">prior_choice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prior_choice</span><span class="p">,</span>
+                <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span>
+                <span class="n">b</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span>
+                <span class="n">kernel_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_type</span><span class="p">,</span>
+                <span class="n">isotropic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">isotropic</span><span class="p">,</span>
+                <span class="n">optimization</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimization</span><span class="p">,</span>
+                <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span>
+                <span class="n">lower_bound</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">,</span>
+                <span class="n">max_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_eval</span><span class="p">,</span>
+                <span class="n">num_initial_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_initial_values</span><span class="p">,</span>
+            <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ScalarGaSP.predict">
+<a class="viewcode-back" href="../../../emulator/robustgasp.html#psimpy.emulator.robustgasp.ScalarGaSP.predict">[docs]</a>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">testing_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">testing_trend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make prediction using the trained scalar GP emulator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        testing_input : numpy array</span>
+<span class="sd">            Input points at which to make prediction. Shape :code:`(ntest, ndim)`.</span>
+<span class="sd">            ``ntest`` is the number of input points and ``ndim`` is the</span>
+<span class="sd">            input dimension. If :math:`ndim=1`, both :code:`(ntest, 1)` and</span>
+<span class="sd">            :code:`(ntest,)` :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        testing_trend : numpy array, optional</span>
+<span class="sd">            Basis function matrix corresponds to ``testing_input``.</span>
+<span class="sd">            Shape :code:`(ntest, q)`. By default :code:`(ntest, 1)` matrix of ones.</span>
+<span class="sd">            If :math:`q=1`, both :code:`(ntest, 1)` and :code:`(ntest,)`</span>
+<span class="sd">            :class:`numpy.ndarray` are valid.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        predictions : numpy array</span>
+<span class="sd">            Emulator-prediction at ``testing_input``. Shape :code:`(ntest, 4)`.</span>
+<span class="sd">            `predictions[:, 0]` - mean,</span>
+<span class="sd">            `predictions[:, 1]` - low95,</span>
+<span class="sd">            `predictions[:, 2]` - upper95,</span>
+<span class="sd">            `predictions[:, 3]` - sd</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Emulator has not been trained!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_testing_input_trend</span><span class="p">(</span><span class="n">testing_input</span><span class="p">,</span> <span class="n">testing_trend</span><span class="p">)</span>
+
+        <span class="n">r_predictions</span> <span class="o">=</span> <span class="n">RobustGaSP</span><span class="o">.</span><span class="n">predict_rgasp</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">testing_input</span><span class="p">,</span>
+            <span class="n">testing_trend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">testing_trend</span><span class="p">,</span>
+            <span class="n">interval_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">outasS3</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">r_predictions</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">predictions</span></div>
+
+
+<div class="viewcode-block" id="ScalarGaSP.sample">
+<a class="viewcode-back" href="../../../emulator/robustgasp.html#psimpy.emulator.robustgasp.ScalarGaSP.sample">[docs]</a>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">testing_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">nsamples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">testing_trend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw samples using the trained scalar GP emulator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        testing_input : numpy array</span>
+<span class="sd">            Input points at which to draw samples. Shape :code:`(ntest, ndim)`.</span>
+<span class="sd">            ``ntest`` is the number of input points and ``ndim`` is the input</span>
+<span class="sd">            dimension. If :math:`ndim=1`, both :code:`(ntest, 1)` and</span>
+<span class="sd">            :code:`(ntest,)` :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        nsamples : int, optional</span>
+<span class="sd">            Number of samples to be drawn.</span>
+<span class="sd">        testing_trend : numpy array, optional</span>
+<span class="sd">            Basis function matrix corresponds to ``testing_input``.</span>
+<span class="sd">            Shape :code:`(ntest, q)`. By default :code:`(ntest, 1)` matrix of ones.</span>
+<span class="sd">            If :math:`q=1`, both :code:`(ntest, 1)` and :code:`(ntest,)`</span>
+<span class="sd">            :class:`numpy.ndarray` are valid.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        samples : numpy array</span>
+<span class="sd">            Shape :code:`(ntest, nsamples)`. Each column contains one realization</span>
+<span class="sd">            of the trained emulator at ``testing_input``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Emulator has not been trained!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_testing_input_trend</span><span class="p">(</span><span class="n">testing_input</span><span class="p">,</span> <span class="n">testing_trend</span><span class="p">)</span>
+
+        <span class="n">r_samples</span> <span class="o">=</span> <span class="n">RobustGaSP</span><span class="o">.</span><span class="n">Sample</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">testing_input</span><span class="p">,</span>
+            <span class="n">num_sample</span><span class="o">=</span><span class="n">nsamples</span><span class="p">,</span>
+            <span class="n">testing_trend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">testing_trend</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">r_samples</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">samples</span></div>
+
+
+<div class="viewcode-block" id="ScalarGaSP.loo_validate">
+<a class="viewcode-back" href="../../../emulator/robustgasp.html#psimpy.emulator.robustgasp.ScalarGaSP.loo_validate">[docs]</a>
+    <span class="k">def</span> <span class="nf">loo_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Validate trained scalar GP emulator using leave-one-out-cross-validation.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        validation : numpy array</span>
+<span class="sd">            Shape :code:`(n, 2)`.</span>
+<span class="sd">            validation[:, 0] - leave-one-out fitted values</span>
+<span class="sd">            validation[:, 1] - standard deviation of each prediction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Emulator has not been trained!&quot;</span><span class="p">)</span>
+
+        <span class="n">r_validation</span> <span class="o">=</span> <span class="n">RobustGaSP</span><span class="o">.</span><span class="n">leave_one_out_rgasp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">emulator</span><span class="p">)</span>
+        <span class="n">validation</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">r_validation</span><span class="p">))</span>
+
+        <span class="k">return</span> <span class="n">validation</span></div>
+
+    
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">repeated_kfold_validate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">k</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">5</span><span class="p">,</span> <span class="n">repeat</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Performs repeated K-Fold cross-validation on trained emulator. Calculates</span>
+<span class="sd">        MAPE, NRMSE, and R^2 errors.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">            k : int, optional</span>
+<span class="sd">                K-factor. Default is :math:`5`.</span>
+<span class="sd">            repeat : int, optiona</span>
+<span class="sd">                Repeat-factor. Default is :math:`10`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">            validation_dict : dict</span>
+<span class="sd">                A dictionary consists of key-value pairs of error metrics (MAPE, </span>
+<span class="sd">                NRMSE, and R^2) and numpy array of respective error per validation</span>
+<span class="sd">                step.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Emulator has not been trained!&quot;</span><span class="p">)</span>
+        
+        <span class="n">X</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">design</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span>
+
+        <span class="n">rkf</span> <span class="o">=</span> <span class="n">RepeatedKFold</span><span class="p">(</span><span class="n">n_splits</span><span class="o">=</span><span class="n">k</span><span class="p">,</span> <span class="n">n_repeats</span><span class="o">=</span><span class="n">repeat</span><span class="p">)</span>
+        <span class="n">nval</span> <span class="o">=</span> <span class="n">rkf</span><span class="o">.</span><span class="n">get_n_splits</span><span class="p">()</span> 
+
+        <span class="n">MAPE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">nval</span><span class="p">)</span>           <span class="c1"># mean absolute percentage</span>
+        <span class="n">R_squared</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">nval</span><span class="p">)</span>      <span class="c1"># coefficient of determination</span>
+        <span class="n">NRMSE</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">empty</span><span class="p">(</span><span class="n">nval</span><span class="p">)</span>          <span class="c1"># normalized root mean square</span>
+
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">train_index</span><span class="p">,</span> <span class="n">test_index</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rkf</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="n">X</span><span class="p">)):</span>
+            <span class="n">training_inputs</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">train_index</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">training_outputs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">train_index</span><span class="p">]</span>
+            <span class="n">testing_inputs</span> <span class="o">=</span> <span class="n">X</span><span class="p">[</span><span class="n">test_index</span><span class="p">,</span> <span class="p">:]</span>
+            <span class="n">testing_outputs</span> <span class="o">=</span> <span class="n">y</span><span class="p">[</span><span class="n">test_index</span><span class="p">]</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">train</span><span class="p">(</span><span class="n">training_inputs</span><span class="p">,</span> <span class="n">training_outputs</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">prediction</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="n">testing_inputs</span><span class="p">)[:,</span> <span class="mi">0</span><span class="p">]</span>
+
+            <span class="n">R_squared</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">prediction</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">R_squared</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">testing_outputs</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+
+            <span class="n">MAPE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="mi">100</span> <span class="o">*</span> <span class="n">mean_absolute_percentage_error</span><span class="p">(</span><span class="n">testing_outputs</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+
+            <span class="n">RMSD</span> <span class="o">=</span> <span class="n">root_mean_squared_error</span><span class="p">(</span><span class="n">testing_outputs</span><span class="p">,</span> <span class="n">prediction</span><span class="p">)</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">testing_outputs</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span> <span class="o">&lt;</span> <span class="n">sys</span><span class="o">.</span><span class="n">float_info</span><span class="o">.</span><span class="n">epsilon</span><span class="p">:</span>
+                <span class="n">NRMSE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">NRMSE</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span>  <span class="n">RMSD</span> <span class="o">/</span> <span class="n">mean</span>
+
+        <span class="n">validation_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;MAPE&quot;</span><span class="p">:</span> <span class="n">MAPE</span><span class="p">,</span> <span class="s2">&quot;NRMSE&quot;</span><span class="p">:</span> <span class="n">NRMSE</span><span class="p">,</span> <span class="s2">&quot;R_squared&quot;</span><span class="p">:</span> <span class="n">R_squared</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">validation_dict</span></div>
+
+
+
+<div class="viewcode-block" id="PPGaSP">
+<a class="viewcode-back" href="../../../emulator/robustgasp.html#psimpy.emulator.robustgasp.PPGaSP">[docs]</a>
+<span class="k">class</span> <span class="nc">PPGaSP</span><span class="p">(</span><span class="n">RobustGaSPBase</span><span class="p">):</span>
+<div class="viewcode-block" id="PPGaSP.train">
+<a class="viewcode-back" href="../../../emulator/robustgasp.html#psimpy.emulator.robustgasp.PPGaSP.train">[docs]</a>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">train</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">design</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">response</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">trend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Train a parallel partial GP given training data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        design : numpy array</span>
+<span class="sd">            Training input points. Shape :code:`(ntrain, ndim)`.</span>
+<span class="sd">            ``ntrain`` is the number of training points, ``ndim`` is the input</span>
+<span class="sd">            dimension. If :math:`ndim=1`, both :code:`(ndim, 1)` and</span>
+<span class="sd">            :code:`(ndim,)` :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        response : numpy array</span>
+<span class="sd">            Training output points. Shape :code:`(ntrain, nresponse)`,</span>
+<span class="sd">            :math:`nresponse&gt;1`.</span>
+<span class="sd">        trend : numpy array, optional</span>
+<span class="sd">            Basis function matrix. Shape :code:`(ntrain, q)`.</span>
+<span class="sd">            If `None`, a :code:`(ntrain, 1)` matrix of ones is used.</span>
+<span class="sd">            If :math:`q=1`, both :code:`(ntrain, 1)` and :code:`(ntrain,)`</span>
+<span class="sd">            :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_design_response_trend</span><span class="p">(</span><span class="n">design</span><span class="p">,</span> <span class="n">response</span><span class="p">,</span> <span class="n">trend</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="s2">&quot;PPGaSP should be used for models with vector output.&quot;</span>
+                <span class="s2">&quot; For scalar output model, please use ScalarGaSP.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span> <span class="o">=</span> <span class="n">RobustGaSP</span><span class="o">.</span><span class="n">ppgasp</span><span class="p">(</span>
+            <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
+            <span class="n">response</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="p">,</span>
+            <span class="n">trend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trend</span><span class="p">,</span>
+            <span class="n">zero_mean</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zero_mean</span><span class="p">,</span>
+            <span class="n">nugget</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nugget</span><span class="p">,</span>
+            <span class="n">nugget_est</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">nugget_est</span><span class="p">,</span>
+            <span class="n">range_par</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">range_par</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">prior_choice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prior_choice</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span>
+            <span class="n">b</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span>
+            <span class="n">kernel_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_type</span><span class="p">,</span>
+            <span class="n">isotropic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">isotropic</span><span class="p">,</span>
+            <span class="n">optimization</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimization</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">lower_bound</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">,</span>
+            <span class="n">max_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_eval</span><span class="p">,</span>
+            <span class="n">num_initial_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_initial_values</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="PPGaSP.predict">
+<a class="viewcode-back" href="../../../emulator/robustgasp.html#psimpy.emulator.robustgasp.PPGaSP.predict">[docs]</a>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">predict</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">testing_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">testing_trend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make prediction using the trained parallel partial GP emulator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        testing_input : numpy array</span>
+<span class="sd">            Input points at which to make prediction. Shape :code:`(ntest, ndim)`.</span>
+<span class="sd">            ``ntest`` is the number of input points and ``ndim`` is the input</span>
+<span class="sd">            dimension. If :math:`ndim=1`, both :code:`(ntest, 1)` and</span>
+<span class="sd">            :code:`(ntest,)` :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        testing_trend : numpy array, optional</span>
+<span class="sd">            Basis function matrix corresponds to ``testing_input``.</span>
+<span class="sd">            Shape :code:`(ntest, q)`. By default :code:`(ntest, 1)` matrix of ones.</span>
+<span class="sd">            If :math:`q=1`, both :code:`(ntest, 1)` and :code:`(ntest,)`</span>
+<span class="sd">            :class:`numpy.ndarray` are valid.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        predictions : numpy array</span>
+<span class="sd">            Emulator-prediction at ``testing_input``.</span>
+<span class="sd">            Shape :code:`(ntest, nresponse, 4)`.</span>
+<span class="sd">            `predictions[:, :, 0]` - mean,</span>
+<span class="sd">            `predictions[:, :, 1]` - low95,</span>
+<span class="sd">            `predictions[:, :, 2]` - upper95,</span>
+<span class="sd">            `predictions[:, :, 3]` - sd</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Emulator has not been trained!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_testing_input_trend</span><span class="p">(</span><span class="n">testing_input</span><span class="p">,</span> <span class="n">testing_trend</span><span class="p">)</span>
+
+        <span class="n">r_predictions</span> <span class="o">=</span> <span class="n">RobustGaSP</span><span class="o">.</span><span class="n">predict_ppgasp</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">testing_input</span><span class="p">,</span>
+            <span class="n">testing_trend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">testing_trend</span><span class="p">,</span>
+            <span class="n">interval_data</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+            <span class="n">outasS3</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">ntest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">testing_input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nresponse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">predictions</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ntest</span><span class="p">,</span> <span class="n">nresponse</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">4</span><span class="p">):</span>
+            <span class="n">predictions</span><span class="p">[:,</span> <span class="p">:,</span> <span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">r_predictions</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="k">return</span> <span class="n">predictions</span></div>
+
+
+<div class="viewcode-block" id="PPGaSP.sample">
+<a class="viewcode-back" href="../../../emulator/robustgasp.html#psimpy.emulator.robustgasp.PPGaSP.sample">[docs]</a>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">testing_input</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span>
+        <span class="n">nsamples</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+        <span class="n">testing_trend</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Draw samples using the trained parallel partial GaSP emulator.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        testing_input : numpy array</span>
+<span class="sd">            Input point at which to draw samples. Shape :code:`(ntest, ndim)`.</span>
+<span class="sd">            ``ntest`` is the number of input points and ``ndim`` is the input</span>
+<span class="sd">            dimension. If :math:`ndim=1`, both :code:`(ntest, 1)` and</span>
+<span class="sd">            :code:`(ntest,)` :class:`numpy.ndarray` are valid.</span>
+<span class="sd">        nsamples : int, optional</span>
+<span class="sd">            Number of samples to be drawn.</span>
+<span class="sd">        testing_trend : numpy array, optional</span>
+<span class="sd">            Basis function matrix corresponds to ``testing_input``.</span>
+<span class="sd">            Shape :code:`(ntest, q)`. By default :code:`(ntest, 1)` matrix of ones.</span>
+<span class="sd">            If :math:`q=1`, both :code:`(ntest, 1)` and :code:`(ntest,)`</span>
+<span class="sd">            :class:`numpy.ndarray` are valid.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        samples : numpy array</span>
+<span class="sd">            Shape :code:`(ntest, nresponse, nsamples)`.</span>
+<span class="sd">            `samples[:, :, i]` corresponds to i-th realization of the trained</span>
+<span class="sd">            emulator at ``testing_input``, i=1, ..., ``nsamples``.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">emulator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span><span class="s2">&quot;Emulator has not been trained!&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_preprocess_testing_input_trend</span><span class="p">(</span><span class="n">testing_input</span><span class="p">,</span> <span class="n">testing_trend</span><span class="p">)</span>
+
+        <span class="n">ntest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">testing_input</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">nresponse</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="c1"># extract trained parameters of ppgasp_emulator</span>
+        <span class="n">sigma2_hat</span> <span class="o">=</span> <span class="n">r_at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">emulator</span><span class="p">,</span> <span class="s2">&quot;sigma2_hat&quot;</span><span class="p">)</span>
+        <span class="n">nugget</span> <span class="o">=</span> <span class="n">r_at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">emulator</span><span class="p">,</span> <span class="s2">&quot;nugget&quot;</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">beta_hat</span> <span class="o">=</span> <span class="n">r_at</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">emulator</span><span class="p">,</span> <span class="s2">&quot;beta_hat&quot;</span><span class="p">)</span>
+        <span class="n">range_par</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">beta_hat</span>
+
+        <span class="c1"># set up a rgasp_emulator using trained parameters of ppgasp_emulator</span>
+        <span class="n">rgasp_emulator</span> <span class="o">=</span> <span class="n">RobustGaSP</span><span class="o">.</span><span class="n">rgasp</span><span class="p">(</span>
+            <span class="n">design</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">design</span><span class="p">,</span>
+            <span class="n">response</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">response</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span>
+            <span class="n">trend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">trend</span><span class="p">,</span>
+            <span class="n">zero_mean</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">zero_mean</span><span class="p">,</span>
+            <span class="n">nugget</span><span class="o">=</span><span class="n">nugget</span><span class="p">,</span>
+            <span class="n">nugget_est</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+            <span class="n">range_par</span><span class="o">=</span><span class="n">range_par</span><span class="p">,</span>
+            <span class="n">method</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+            <span class="n">prior_choice</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">prior_choice</span><span class="p">,</span>
+            <span class="n">a</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">a</span><span class="p">,</span>
+            <span class="n">b</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_b</span><span class="p">,</span>
+            <span class="n">kernel_type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">kernel_type</span><span class="p">,</span>
+            <span class="n">isotropic</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">isotropic</span><span class="p">,</span>
+            <span class="n">optimization</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">optimization</span><span class="p">,</span>
+            <span class="n">alpha</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">alpha</span><span class="p">,</span>
+            <span class="n">lower_bound</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">lower_bound</span><span class="p">,</span>
+            <span class="n">max_eval</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_eval</span><span class="p">,</span>
+            <span class="n">num_initial_values</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_initial_values</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="c1"># predictions and samples of y1 at testing_input using rgasp_emulator</span>
+        <span class="n">r_predictions_y1</span> <span class="o">=</span> <span class="n">RobustGaSP</span><span class="o">.</span><span class="n">predict_rgasp</span><span class="p">(</span>
+            <span class="n">rgasp_emulator</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testing_input</span><span class="p">,</span> <span class="n">testing_trend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">testing_trend</span>
+        <span class="p">)</span>
+        <span class="n">predictions_y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">r_predictions_y1</span><span class="p">))</span>
+        <span class="n">predictions_mean_y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">predictions_y1</span><span class="p">[:,</span> <span class="mi">0</span><span class="p">],</span> <span class="p">(</span><span class="n">ntest</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+
+        <span class="n">r_samples_y1</span> <span class="o">=</span> <span class="n">RobustGaSP</span><span class="o">.</span><span class="n">Sample</span><span class="p">(</span>
+            <span class="n">rgasp_emulator</span><span class="p">,</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">testing_input</span><span class="p">,</span>
+            <span class="n">num_sample</span><span class="o">=</span><span class="n">nsamples</span><span class="p">,</span>
+            <span class="n">testing_trend</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">testing_trend</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">samples_y1</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">r_samples_y1</span><span class="p">)</span>
+
+        <span class="c1"># use predictions_mean and samples of y1 to calculate LW term</span>
+        <span class="n">LW_term</span> <span class="o">=</span> <span class="p">(</span><span class="n">samples_y1</span> <span class="o">-</span> <span class="n">predictions_mean_y1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma2_hat</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+        <span class="c1"># predictions of y1,...,yk using ppgasp_emulator</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">testing_input</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">testing_trend</span><span class="p">)</span>
+        <span class="n">predictions_mean</span> <span class="o">=</span> <span class="n">predictions</span><span class="p">[:,</span> <span class="p">:,</span> <span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">((</span><span class="n">ntest</span><span class="p">,</span> <span class="n">nresponse</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">nresponse</span><span class="p">):</span>
+            <span class="n">samples</span><span class="p">[:,</span> <span class="n">i</span><span class="p">,</span> <span class="p">:]</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">predictions_mean</span><span class="p">[:,</span> <span class="n">i</span><span class="p">],</span> <span class="p">(</span><span class="n">ntest</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+                <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sigma2_hat</span><span class="p">[</span><span class="n">i</span><span class="p">])</span> <span class="o">*</span> <span class="n">LW_term</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">samples</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

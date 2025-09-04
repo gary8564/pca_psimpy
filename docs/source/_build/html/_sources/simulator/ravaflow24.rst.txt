@@ -1,0 +1,24 @@
+Ravaflow24 Mixture Model
+========================
+
+`r.avaflow 2.4` is a GIS-supported open source software for mass flow modeling.
+It is developed by :cite:t:`Mergili2017`. For more information see its official
+user manual `here <https://www.landslidemodels.org/r.avaflow/>`_. 
+
+In :py:mod:`PSimPy.simulator.ravaflow24`, we have implemented class 
+:class:`.Ravaflow24Mixture`. It provides an Python interface to directly run
+the `Voellmy-tpye shallow flow model` of `r.avaflow 2.4` from within Python.
+For detailed theory of `Voellmy-tpye shallow flow model`, one can refer to
+:cite:t:`Christen2010` and :cite:t:`Fischer2012`.
+
+Ravaflow24Mixture Class
+-----------------------
+
+The :class:`.Ravaflow24Mixture` class is imported by::
+    
+    from psimpy.simulator.ravaflow24 import Ravaflow24Mixture
+
+Methods
+^^^^^^^
+.. autoclass:: psimpy.simulator.ravaflow24.Ravaflow24Mixture
+    :members: preprocess, run, extract_impact_area, extract_qoi_max, extract_qoi_max_loc

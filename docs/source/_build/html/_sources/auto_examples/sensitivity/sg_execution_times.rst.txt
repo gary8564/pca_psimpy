@@ -1,0 +1,12 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_sensitivity_sg_execution_times:
+
+Computation times
+=================
+**00:12.674** total execution time for **auto_examples_sensitivity** files:
+
++---------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_sensitivity_plot_sobol_analyze.py` (``plot_sobol_analyze.py``) | 00:12.674 | 0.0 MB |
++---------------------------------------------------------------------------------------------+-----------+--------+

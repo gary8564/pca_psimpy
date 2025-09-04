@@ -1,0 +1,14 @@
+
+:orphan:
+
+.. _sphx_glr_auto_examples_inference_sg_execution_times:
+
+Computation times
+=================
+**00:06.619** total execution time for **auto_examples_inference** files:
+
++-----------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_inference_plot_bayes_inference.py` (``plot_bayes_inference.py``) | 00:06.619 | 0.0 MB |
++-----------------------------------------------------------------------------------------------+-----------+--------+
+| :ref:`sphx_glr_auto_examples_inference_plot_active_learning.py` (``plot_active_learning.py``) | 00:00.000 | 0.0 MB |
++-----------------------------------------------------------------------------------------------+-----------+--------+

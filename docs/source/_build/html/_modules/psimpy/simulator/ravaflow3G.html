@@ -1,0 +1,625 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>psimpy.simulator.ravaflow3G &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../../../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../../_static/documentation_options.js?v=938c9ccc"></script>
+        <script src="../../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API &amp; Theory</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../examples.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">psimpy.simulator.ravaflow3G</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for psimpy.simulator.ravaflow3G</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">linecache</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">from</span> <span class="nn">scipy.interpolate</span> <span class="kn">import</span> <span class="n">RegularGridInterpolator</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">beartype</span> <span class="kn">import</span> <span class="n">beartype</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+
+
+<div class="viewcode-block" id="Ravaflow3GMixture">
+<a class="viewcode-back" href="../../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture">[docs]</a>
+<span class="k">class</span> <span class="nc">Ravaflow3GMixture</span><span class="p">:</span>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">dir_sim</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">time_step</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">10</span><span class="p">,</span>
+        <span class="n">time_end</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mi">300</span><span class="p">,</span>
+        <span class="n">cfl</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.4</span><span class="p">,</span>
+        <span class="n">time_step_length</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001</span><span class="p">,</span>
+        <span class="n">diffusion_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="n">curvature_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span>
+        <span class="n">surface_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="n">entrainment_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="n">stopping_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="n">stopping_threshold</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
+        <span class="n">friction_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="n">non_hydro_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="n">phase_sep_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+        <span class="n">hydrograph_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span>
+        <span class="n">deceleration_control</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;0&quot;</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        `r.avaflow 3G Mixture model` (Voellmy-type shallow flow model).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dir_sim : str</span>
+<span class="sd">            Directory to save output files generated by `r.avaflow`.</span>
+<span class="sd">        time_step : float or int</span>
+<span class="sd">            Time step for simulation, in seconds.</span>
+<span class="sd">        time_end : float or int</span>
+<span class="sd">            End time for simulation, in seconds.</span>
+<span class="sd">        cfl : float</span>
+<span class="sd">            CFL criterion, a value being equal or smaller than 0.5.</span>
+<span class="sd">        time_step_length : float</span>
+<span class="sd">            If ``cfl`` is not applicable, ``time_step_length`` is used.</span>
+<span class="sd">            In seconds. Recommended range is around :math:`0.1` to :math:`0.5`.</span>
+<span class="sd">        diffusion_control : str</span>
+<span class="sd">            `&#39;0&#39;`: no diffusion control (default)</span>
+<span class="sd">            `&#39;1&#39;`: experimental diffusion control is applied</span>
+<span class="sd">        curvature_control : str</span>
+<span class="sd">            `&#39;0&#39;`: curvature is neglected (default).</span>
+<span class="sd">            `&#39;1&#39;`: curvature is considered in the decelerating source terms (default).</span>
+<span class="sd">            `&#39;2&#39;`: curvature is considered in all relevant terms.</span>
+<span class="sd">        surface_control : str</span>
+<span class="sd">            `&#39;0&#39;`: no balancing of forces (default).</span>
+<span class="sd">            `&#39;1&#39;`: apply balancing of forces.</span>
+<span class="sd">        entrainment_control : str</span>
+<span class="sd">            `&#39;0&#39;`: no entrainment (default).</span>
+<span class="sd">            `&#39;1&#39;`: the entrainment coefficient (see `preprocess`) is multiplied with flow momentum.</span>
+<span class="sd">            `&#39;2&#39;`: simplified entrainment and deposition model is used.</span>
+<span class="sd">            `&#39;3&#39;`: combination of `&#39;1&#39;` for entrainmnet and `&#39;2&#39;` for deposition.</span>
+<span class="sd">            `&#39;4&#39;`: acceleration-deceleration entrainment and deposition model.</span>
+<span class="sd">        stopping_control : str</span>
+<span class="sd">            `&#39;0&#39;`: no stopping control is used (default).</span>
+<span class="sd">            `&#39;1&#39;`: stop if the flow kinetic energy ratio is equal or smaller than</span>
+<span class="sd">            given threshold ``stopping_threshold``.</span>
+<span class="sd">            `&#39;2&#39;`: stop if the flow momentum ratio is equal or smaller than</span>
+<span class="sd">            given threshold ``stopping_threshold``.</span>
+<span class="sd">            `&#39;3&#39;`: stop if the dynamic flow pressure of all raster cells is</span>
+<span class="sd">            euqal or smaller than a given threshold.</span>
+<span class="sd">        stopping_threshold : float</span>
+<span class="sd">            Threshold value for `stopping_control`.</span>
+<span class="sd">            If `stopping_control` is `&#39;1&#39;` or `&#39;2&#39;`, a ``stopping_threshold``</span>
+<span class="sd">            has to be given with respect to maximal flow kinetic energy/momentum.</span>
+<span class="sd">            If ``stopping_control`` is `&#39;3&#39;`, the pressure threshold has to be</span>
+<span class="sd">            specified.</span>
+<span class="sd">        friction_control : str, optional</span>
+<span class="sd">            `&#39;0&#39;`: no dynamic adaptation of friction parameters (default).</span>
+<span class="sd">            `&#39;1&#39;`: dynamic adaptation of friction parameters (ignored for the</span>
+<span class="sd">            mixture model).</span>
+<span class="sd">        non_hydro_control: str</span>
+<span class="sd">            `&#39;0&#39;`: Non-hydrostatic effects are excluded (default).</span>
+<span class="sd">            `&#39;1&#39;`: Only dispersion is considered.</span>
+<span class="sd">            `&#39;2&#39;`: Only enhanced gravity is considered.</span>
+<span class="sd">            `&#39;3&#39;`: Both dispersion and enhanced gravity are considered.</span>
+<span class="sd">        phase_sep_control: str</span>
+<span class="sd">            `&#39;0&#39;`: Phase separation is neglected (default).</span>
+<span class="sd">            `&#39;1&#39;`: Phase separation is considered.</span>
+<span class="sd">        hydrograph_control: str</span>
+<span class="sd">            `&#39;0&#39;`: Impose hydrograph on the flow.</span>
+<span class="sd">            `&#39;1&#39;`: Reset flow at the hydrograph profile before imposing the hydrograph.</span>
+<span class="sd">            `&#39;2&#39;`: Impose the entire material added through the hydrograph on the centre of the hydrograph profile (default).</span>
+<span class="sd">        deceleration_control: str</span>
+<span class="sd">            `&#39;0&#39;`: Suppress change of direction induced by frictional or viscous forces (default).</span>
+<span class="sd">            `&#39;1&#39;`: Do not suppress the change of direction.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;r.avaflow 3 and lower versions are not supported by its </span><span class="se">\</span>
+<span class="s2">                developers, and their use is discouraged. Therefore, ravaflow3G </span><span class="se">\</span>
+<span class="s2">                module will be deprecated in the future versions.&quot;</span><span class="p">,</span>
+            <span class="ne">FutureWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">isdir</span><span class="p">(</span><span class="n">dir_sim</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">dir_sim</span><span class="si">}</span><span class="s2"> does not exist or is not a directory&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dir_sim</span> <span class="o">=</span> <span class="n">dir_sim</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_step</span> <span class="o">=</span> <span class="n">time_step</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_end</span> <span class="o">=</span> <span class="n">time_end</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cfl</span> <span class="o">=</span> <span class="n">cfl</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">time_step_length</span> <span class="o">=</span> <span class="n">time_step_length</span>
+
+        <span class="k">if</span> <span class="n">diffusion_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;diffusion_control must be &#39;0&#39; or &#39;1&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">diffusion_control</span> <span class="o">=</span> <span class="n">diffusion_control</span>
+
+        <span class="k">if</span> <span class="n">curvature_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;curvature_control must be &#39;0&#39; or &#39;1&#39; or &#39;2&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">curvature_control</span> <span class="o">=</span> <span class="n">curvature_control</span>
+
+        <span class="k">if</span> <span class="n">surface_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;surface_control must be &#39;0&#39; or &#39;1&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">surface_control</span> <span class="o">=</span> <span class="n">surface_control</span>
+
+        <span class="k">if</span> <span class="n">entrainment_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">,</span> <span class="s2">&quot;4&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;entrainment_control must be &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, &#39;3&#39;, or &#39;4&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">entrainment_control</span> <span class="o">=</span> <span class="n">entrainment_control</span>
+
+        <span class="k">if</span> <span class="n">stopping_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;stopping_control must be &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, or &#39;3&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_control</span> <span class="o">=</span> <span class="n">stopping_control</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">stopping_threshold</span> <span class="o">=</span> <span class="n">stopping_threshold</span>
+
+        <span class="k">if</span> <span class="n">friction_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;friction_control must be &#39;0&#39; or &#39;1&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">friction_control</span> <span class="o">=</span> <span class="n">friction_control</span>
+
+        <span class="k">if</span> <span class="n">non_hydro_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">,</span> <span class="s2">&quot;3&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;non_hydro_control must be &#39;0&#39;, &#39;1&#39;, &#39;2&#39;, or &#39;3&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">non_hydro_control</span> <span class="o">=</span> <span class="n">non_hydro_control</span>
+
+        <span class="k">if</span> <span class="n">phase_sep_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;phase_sep_control must be &#39;0&#39; or &#39;1&#39;.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">phase_sep_control</span> <span class="o">=</span> <span class="n">phase_sep_control</span>
+
+        <span class="k">if</span> <span class="n">hydrograph_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="s2">&quot;2&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;hydrograph_control must be &#39;0&#39;, &#39;1&#39;, or &#39;2&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">hydrograph_control</span> <span class="o">=</span> <span class="n">hydrograph_control</span>
+
+        <span class="k">if</span> <span class="n">deceleration_control</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;0&quot;</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;deceleration_control must be &#39;0&#39; or &#39;1&#39;&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">deceleration_control</span> <span class="o">=</span> <span class="n">deceleration_control</span>
+
+<div class="viewcode-block" id="Ravaflow3GMixture.preprocess">
+<a class="viewcode-back" href="../../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture.preprocess">[docs]</a>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">preprocess</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">elevation</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">hrelease</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+        <span class="n">cellsize</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">hrelease_ratio</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
+        <span class="n">internal_friction</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span> <span class="o">=</span> <span class="mi">35</span><span class="p">,</span>
+        <span class="n">basal_friction</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span> <span class="o">=</span> <span class="mi">20</span><span class="p">,</span>
+        <span class="n">turbulent_friction</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">integer</span><span class="p">]</span> <span class="o">=</span> <span class="mi">3</span><span class="p">,</span>
+        <span class="n">entrainment_coef</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">floating</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="mf">7.0</span><span class="p">,</span>
+        <span class="n">EPSG</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Preprocess simulation input data.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prefix : str</span>
+<span class="sd">            Prefix required by `r.avaflow` to name output files.</span>
+<span class="sd">        elevation : str</span>
+<span class="sd">            Name of elevation raster file (including its path).</span>
+<span class="sd">            The file format should be supported by `GDAL`.</span>
+<span class="sd">            Its unit is in meters.</span>
+<span class="sd">        hrelease : str</span>
+<span class="sd">            Name of release height raster file (including its path).</span>
+<span class="sd">            The file format should be supported by `GDAL`.</span>
+<span class="sd">            Its unit is in meters.</span>
+<span class="sd">        cellsize : float or int, optional</span>
+<span class="sd">            Cell size in meters to be used for simulation.</span>
+<span class="sd">        hrelease_ratio : float, optional</span>
+<span class="sd">            A positive value to multiple ``hrelease`` in order to control</span>
+<span class="sd">            the release volume.</span>
+<span class="sd">        internal_friction : float or int, optional</span>
+<span class="sd">            Internal friction angle, in degrees, range :math:`[0,90)`.</span>
+<span class="sd">        basal_friction : float or int, optional</span>
+<span class="sd">            Basal friction angle, in degrees, range :math:`[0,90)`.</span>
+<span class="sd">        turbulent_friction : float or int, optional</span>
+<span class="sd">            Logarithm with base :math:`10` of the turbulent friction, in</span>
+<span class="sd">            :math:`m/s^2`.</span>
+<span class="sd">        entrainment_coef : float, optional</span>
+<span class="sd">            Logarithm with base :math:`10` of the entrainment coefficient,</span>
+<span class="sd">            except for :math:`0` meaning no entrainment.</span>
+<span class="sd">        EPSG : str, optional</span>
+<span class="sd">            `EPSG` (European Petroleum Survey Group) code to create</span>
+<span class="sd">            `GRASS Location &lt;https://grass.osgeo.org/grass82/manuals/grass_database.html&gt;`_.</span>
+<span class="sd">            If `None`, ``elevation`` must be a georeferenced file which has</span>
+<span class="sd">            metadata to create the GRASS Location.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        grass_location : str</span>
+<span class="sd">            Name of the `GRASS Location` (including path).</span>
+<span class="sd">        sh_file : str</span>
+<span class="sd">            Name of the shell file (including path), which will be called by</span>
+<span class="sd">            `GRASS &lt;https://grass.osgeo.org/&gt;`_ to run the simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;r.avaflow 3 and lower versions are not supported by its </span><span class="se">\</span>
+<span class="s2">                developers, and their use is discouraged. Therefore, ravaflow3G </span><span class="se">\</span>
+<span class="s2">                module will be deprecated in the future versions.&quot;</span><span class="p">,</span>
+            <span class="ne">FutureWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">sh_file</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_sim</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_shell.sh&quot;</span><span class="p">)</span>
+        <span class="n">grass_location</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_sim</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_glocation&quot;</span><span class="p">)</span>
+        <span class="n">results_dir</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_sim</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_results&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="p">(</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sh_file</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">grass_location</span><span class="p">)</span>
+            <span class="ow">or</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">results_dir</span><span class="p">)</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;File(s) with prefix=</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> already exists in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_sim</span><span class="si">}</span><span class="s2">.&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot; Move or delete conflicting files, or use another prefix.&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">elevation</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">elevation</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">hrelease</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">hrelease</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span>
+
+        <span class="c1"># create grass location</span>
+        <span class="k">if</span> <span class="n">EPSG</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;grass -c XY -e </span><span class="si">{</span><span class="n">grass_location</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;grass -e -c EPSG:</span><span class="si">{</span><span class="n">EPSG</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">grass_location</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+        <span class="c1"># create shell file</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">sh_file</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">sh</span><span class="p">:</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# import elevation raster </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;g.region -d </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;r.in.gdal -o input=</span><span class="si">{</span><span class="n">elevation</span><span class="si">}</span><span class="s2"> output=elev --overwrite&quot;</span><span class="p">)</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# set region based on elev </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;g.region -s raster=elev </span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;# import hrelease raster </span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;r.in.gdal -o input=</span><span class="si">{</span><span class="n">hrelease</span><span class="si">}</span><span class="s2"> output=raw_hrel --overwrite&quot;</span><span class="p">)</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;r.mapcalc &quot;hrel = raw_hrel*</span><span class="si">{</span><span class="n">hrelease_ratio</span><span class="si">}</span><span class="s1">&quot; --overwrite&#39;</span><span class="p">)</span>
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">&quot;</span><span class="p">)</span>
+
+            <span class="n">sh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;r.avaflow -e -a prefix=</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2"> cellsize=</span><span class="si">{</span><span class="n">cellsize</span><span class="si">}</span><span class="s2"> phases=x &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;elevation=elev hrelease=hrel &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;friction=</span><span class="si">{</span><span class="n">internal_friction</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="n">basal_friction</span><span class="si">}</span><span class="s2">,&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">turbulent_friction</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;basal=</span><span class="si">{</span><span class="n">entrainment_coef</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_threshold</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;controls=0,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">diffusion_control</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">curvature_control</span><span class="si">}</span><span class="s2">,&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">surface_control</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">entrainment_control</span><span class="si">}</span><span class="s2">,&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">stopping_control</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">friction_control</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">non_hydro_control</span><span class="si">}</span><span class="s2">,&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">phase_sep_control</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">hydrograph_control</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">deceleration_control</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;time=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time_end</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;cfl=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cfl</span><span class="si">}</span><span class="s2">,</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">time_step_length</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">grass_location</span><span class="p">,</span> <span class="n">sh_file</span></div>
+
+
+<div class="viewcode-block" id="Ravaflow3GMixture.run">
+<a class="viewcode-back" href="../../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture.run">[docs]</a>
+    <span class="nd">@beartype</span>
+    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">grass_location</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sh_file</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Run simulation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        grass_location : str</span>
+<span class="sd">            Name of the `GRASS Location` (including path).</span>
+<span class="sd">        sh_file : str</span>
+<span class="sd">            Name of the shell file (including path).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;r.avaflow 3 and lower versions are not supported by its </span><span class="se">\</span>
+<span class="s2">                developers, and their use is discouraged. Therefore, ravaflow3G </span><span class="se">\</span>
+<span class="s2">                module will be deprecated in the future versions.&quot;</span><span class="p">,</span>
+            <span class="ne">FutureWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">grass_location</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">grass_location</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">grass_location</span><span class="p">,</span> <span class="s2">&quot;PERMANENT&quot;</span><span class="p">)):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">grass_location</span><span class="si">}</span><span class="s2"> is not a grass location&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">sh_file</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">sh_file</span><span class="si">}</span><span class="s2"> does not exist&quot;</span><span class="p">)</span>
+
+        <span class="n">grass_mapset</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">grass_location</span><span class="p">,</span> <span class="s2">&quot;PERMANENT&quot;</span><span class="p">,</span> <span class="s2">&quot;&quot;</span><span class="p">)</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">chdir</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dir_sim</span><span class="p">)</span>
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;grass </span><span class="si">{</span><span class="n">grass_mapset</span><span class="si">}</span><span class="s2"> --exec sh </span><span class="si">{</span><span class="n">sh_file</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Ravaflow3GMixture.extract_impact_area">
+<a class="viewcode-back" href="../../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture.extract_impact_area">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_impact_area</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qoi</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="n">threshold</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.5</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract impact area defined by a given quantity of interest and its</span>
+<span class="sd">        threshold.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prefix : str</span>
+<span class="sd">            Prefix used by `r.avaflow` to name output files.</span>
+<span class="sd">        qoi : str</span>
+<span class="sd">            Quantity of interest to determine the impact area.</span>
+<span class="sd">            `&#39;h&#39;`: maximum flow height, in meters.</span>
+<span class="sd">            `&#39;v&#39;`: maximum flow velocity, in :math:`m/s`.</span>
+<span class="sd">            `&#39;p&#39;`: maximum flow pressure, in :math:`Pa`.</span>
+<span class="sd">            `&#39;t&#39;`: maximum flow kinetic energy, in :math:`J`.</span>
+<span class="sd">        threshold : float or int</span>
+<span class="sd">            Threshold of ``qoi`` to determine impact area. Areas where ``qoi``</span>
+<span class="sd">            is larger than ``threshold`` are regarded as impact area.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        impact_area : float</span>
+<span class="sd">            A scalar value representing the overall impact area.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;r.avaflow 3 and lower versions are not supported by its </span><span class="se">\</span>
+<span class="s2">                developers, and their use is discouraged. Therefore, ravaflow3G </span><span class="se">\</span>
+<span class="s2">                module will be deprecated in the future versions.&quot;</span><span class="p">,</span>
+            <span class="ne">FutureWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">qoi</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;qoi must be &#39;h&#39;, &#39;v&#39;, &#39;p&#39;, or &#39;t&#39;&quot;</span><span class="p">)</span>
+
+        <span class="n">qoi_max_raster_asc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dir_sim</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_results&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_ascii&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">qoi</span><span class="si">}</span><span class="s2">flow_max.asc&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">qoi_max_raster</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">qoi_max_raster_asc</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="n">cellsize</span> <span class="o">=</span> <span class="n">linecache</span><span class="o">.</span><span class="n">getline</span><span class="p">(</span><span class="n">qoi_max_raster_asc</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+        <span class="n">cellsize</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">cellsize</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span>
+
+        <span class="n">impact_area</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">qoi_max_raster</span> <span class="o">&gt;</span> <span class="n">threshold</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="p">))</span> <span class="o">*</span> <span class="p">(</span><span class="n">cellsize</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
+        <span class="p">)</span>
+
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">impact_area</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Ravaflow3GMixture.extract_qoi_max">
+<a class="viewcode-back" href="../../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture.extract_qoi_max">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_qoi_max</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">qoi</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">aggregate</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract the maximum value(s) of a quantity of interest.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prefix : str</span>
+<span class="sd">            Prefix used by `r.avaflow` to name output files.</span>
+<span class="sd">        qoi : str</span>
+<span class="sd">            Quantity of interest.</span>
+<span class="sd">            `&#39;h&#39;`: maximum flow height, in meters.</span>
+<span class="sd">            `&#39;v&#39;`: maximum flow velocity, in :math:`m/s`.</span>
+<span class="sd">            `&#39;p&#39;`: maximum flow pressure, in :math:`Pa`.</span>
+<span class="sd">            `&#39;t&#39;`: maximum flow kinetic energy, in :math:`J`.</span>
+<span class="sd">        aggregate : bool</span>
+<span class="sd">            If `True`, returns the overall maximum value over all spatio-temporal</span>
+<span class="sd">            grids. If `False`, returns the maximum values over all time steps at</span>
+<span class="sd">            each spatial location, namely a raster of maximum values.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        qoi_max : float or numpy array</span>
+<span class="sd">            Maximum value(s) of ``qoi`` in one simulation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;r.avaflow 3 and lower versions are not supported by its </span><span class="se">\</span>
+<span class="s2">                developers, and their use is discouraged. Therefore, ravaflow3G </span><span class="se">\</span>
+<span class="s2">                module will be deprecated in the future versions.&quot;</span><span class="p">,</span>
+            <span class="ne">FutureWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">qoi</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;qoi must be &#39;h&#39;, &#39;v&#39;, &#39;p&#39;, or &#39;t&#39;&quot;</span><span class="p">)</span>
+
+        <span class="n">qoi_max_raster_asc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dir_sim</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_results&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_ascii&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">qoi</span><span class="si">}</span><span class="s2">flow_max.asc&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="n">qoi_max_raster</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">qoi_max_raster_asc</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">aggregate</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">qoi_max_raster</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">qoi_max_raster</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Ravaflow3GMixture.extract_qoi_max_loc">
+<a class="viewcode-back" href="../../../simulator/ravaflow3G.html#psimpy.simulator.ravaflow3G.Ravaflow3GMixture.extract_qoi_max_loc">[docs]</a>
+    <span class="k">def</span> <span class="nf">extract_qoi_max_loc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">prefix</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">loc</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">,</span> <span class="n">qoi</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Extract maximum value(s) of a quantity of interest at specific</span>
+<span class="sd">        location(s).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        prefix : str</span>
+<span class="sd">            Prefix used by `r.avaflow` to name output files.</span>
+<span class="sd">        loc : numpy array</span>
+<span class="sd">            Coordinates of interested locations. Shape :code:`(nloc, 2)`, where</span>
+<span class="sd">            ``nloc`` is the number of interested locations.</span>
+<span class="sd">            :code:`loc[:,0]` corresponds to `x` coordinates and</span>
+<span class="sd">            :code:`loc[:,1]` to `y` coordinates.</span>
+<span class="sd">        qoi : str</span>
+<span class="sd">            Quantity of interest.</span>
+<span class="sd">            `&#39;h&#39;`: maximum flow height, in meters.</span>
+<span class="sd">            `&#39;v&#39;`: maximum flow velocity, in :math:`m/s`.</span>
+<span class="sd">            `&#39;p&#39;`: maximum flow pressure, in :math:`Pa`.</span>
+<span class="sd">            `&#39;t&#39;`: maximum flow kinetic energy, in :math:`J`.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        qoi_max_loc : numpy array</span>
+<span class="sd">            Consist of maximum value(s) of ``qoi`` at each location.</span>
+<span class="sd">            Shape of :code:`(nloc,)`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="s2">&quot;r.avaflow 3 and lower versions are not supported by its </span><span class="se">\</span>
+<span class="s2">                developers, and their use is discouraged. Therefore, ravaflow3G </span><span class="se">\</span>
+<span class="s2">                module will be deprecated in the future versions.&quot;</span><span class="p">,</span>
+            <span class="ne">FutureWarning</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">loc</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">2</span> <span class="ow">and</span> <span class="n">loc</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;loc must be a 2d numpy array with first axis corresponding to&quot;</span>
+                <span class="s2">&quot; the number of locations and second axis to x and y coords&quot;</span>
+            <span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">qoi</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;h&quot;</span><span class="p">,</span> <span class="s2">&quot;v&quot;</span><span class="p">,</span> <span class="s2">&quot;p&quot;</span><span class="p">,</span> <span class="s2">&quot;t&quot;</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;qoi must be &#39;h&#39;, &#39;v&#39;, &#39;p&#39;, or &#39;t&#39;&quot;</span><span class="p">)</span>
+
+        <span class="n">qoi_max_raster_asc</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dir_sim</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_results&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_ascii&quot;</span><span class="p">,</span>
+            <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">prefix</span><span class="si">}</span><span class="s2">_</span><span class="si">{</span><span class="n">qoi</span><span class="si">}</span><span class="s2">flow_max.asc&quot;</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="n">header</span> <span class="o">=</span> <span class="p">[</span><span class="n">linecache</span><span class="o">.</span><span class="n">getline</span><span class="p">(</span><span class="n">qoi_max_raster_asc</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="p">)]</span>
+        <span class="n">header_values</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">h</span><span class="o">.</span><span class="n">split</span><span class="p">()[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">())</span> <span class="k">for</span> <span class="n">h</span> <span class="ow">in</span> <span class="n">header</span><span class="p">]</span>
+        <span class="n">ncols</span><span class="p">,</span> <span class="n">nrows</span><span class="p">,</span> <span class="n">xll</span><span class="p">,</span> <span class="n">yll</span><span class="p">,</span> <span class="n">cellsize</span> <span class="o">=</span> <span class="n">header_values</span>
+        <span class="n">ncols</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">ncols</span><span class="p">)</span>
+        <span class="n">nrows</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">nrows</span><span class="p">)</span>
+
+        <span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">xll</span><span class="p">,</span> <span class="n">xll</span> <span class="o">+</span> <span class="p">(</span><span class="n">cellsize</span> <span class="o">*</span> <span class="n">ncols</span><span class="p">),</span> <span class="n">cellsize</span><span class="p">)</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="n">yll</span><span class="p">,</span> <span class="n">yll</span> <span class="o">+</span> <span class="p">(</span><span class="n">cellsize</span> <span class="o">*</span> <span class="n">nrows</span><span class="p">),</span> <span class="n">cellsize</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
+            <span class="p">[</span>
+                <span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">x</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">y</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="ow">and</span> <span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">y</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loc</span><span class="p">))</span>
+            <span class="p">]</span>
+        <span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Coordinates in loc must be within the boundary of topography&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">qoi_max_raster</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">loadtxt</span><span class="p">(</span><span class="n">qoi_max_raster_asc</span><span class="p">,</span> <span class="n">skiprows</span><span class="o">=</span><span class="mi">6</span><span class="p">)</span>
+        <span class="n">qoi_max_raster</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">rot90</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="n">qoi_max_raster</span><span class="p">))</span>
+
+        <span class="n">f_qoi_max</span> <span class="o">=</span> <span class="n">RegularGridInterpolator</span><span class="p">((</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">),</span> <span class="n">qoi_max_raster</span><span class="o">.</span><span class="n">T</span><span class="p">)</span>
+
+        <span class="n">qoi_max_loc</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">loc</span><span class="p">)):</span>
+            <span class="n">point</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">0</span><span class="p">],</span> <span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="mi">1</span><span class="p">]])</span>
+            <span class="n">qoi_max_loc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">f_qoi_max</span><span class="p">(</span><span class="n">point</span><span class="p">)[</span><span class="mi">0</span><span class="p">]))</span>
+
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">qoi_max_loc</span><span class="p">)</span></div>
+</div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

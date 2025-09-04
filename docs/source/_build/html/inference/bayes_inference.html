@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bayes Inference &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Sampler" href="../sampler/index.html" />
+    <link rel="prev" title="Active Learning" href="active_learning.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API &amp; Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../emulator/index.html">Emulator</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Inference</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="active_learning.html"> Active Learning</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"> Bayes Inference</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#gridestimation-class">GridEstimation Class</a></li>
+<li class="toctree-l4"><a class="reference internal" href="#metropolishastingsestimation-class">MetropolisHastingsEstimation Class</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../sampler/index.html">Sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sensitivity/index.html">Sensitivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simulator/index.html">Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API &amp; Theory</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Inference</a></li>
+      <li class="breadcrumb-item active">Bayes Inference</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/inference/bayes_inference.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="bayes-inference">
+<h1>Bayes Inference<a class="headerlink" href="#bayes-inference" title="Link to this heading"></a></h1>
+<p>Bayesian inference is a statistical method for making probabilistic inference about
+unknown parameters based on observed data and prior knowledge. The update from
+prior knowledge to posterior in light of observed data is based on Bayes’ theorem:</p>
+<div class="math notranslate nohighlight" id="equation-bayes">
+<span class="eqno">(1)<a class="headerlink" href="#equation-bayes" title="Link to this equation"></a></span>\[p(\mathbf{x} \mid \mathbf{d}) = \frac{L(\mathbf{x} \mid \mathbf{d}) p(\mathbf{x})}
+{\int L(\mathbf{x} \mid \mathbf{d}) p(\mathbf{x}) d \mathbf{x}}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> represents the collection of unknown parameters and
+<span class="math notranslate nohighlight">\(\mathbf{d}\)</span> represents the collection of observed data. The prior probability
+distribution, <span class="math notranslate nohighlight">\(p(\mathbf{x})\)</span>, represents the degree of belief in the parameters before
+any data is observed. The likelihood function, <span class="math notranslate nohighlight">\(L(\mathbf{x} \mid \mathbf{d})\)</span>, represents
+the probability of observing the data given the parameters. The posterior distribution,
+<span class="math notranslate nohighlight">\(p(\mathbf{x} \mid \mathbf{d})\)</span>, is obtained by multiplying the prior probability
+distribution by the likelihood function and then normalizing the result. Bayesian inference
+allows for incorporating subjective prior beliefs, which can be updated as new data becomes available.</p>
+<p>For many real world problems, it is hardly possible to analytically compute the posterior due to
+the complexity of the denominator in equation <a class="reference internal" href="#equation-bayes">(1)</a>, namely the nomalizing constant. In this
+module, two numerical approximations are implemented: grid estimation and Metropolis Hastings
+estimation.</p>
+<p>In grid estimation, the denominator in equation <a class="reference internal" href="#equation-bayes">(1)</a> is approximated by numerical integration
+on a regular grid and the posterior value at each grid point is computed, as shown in equation
+<a class="reference internal" href="#equation-grid-estimation">(2)</a>. The number of grid points increases dramatically with the increase of the number
+of unknown parameters. Grid estimation is therefore limited to low-dimensional problems.</p>
+<div class="math notranslate nohighlight" id="equation-grid-estimation">
+<span class="eqno">(2)<a class="headerlink" href="#equation-grid-estimation" title="Link to this equation"></a></span>\[p(\mathbf{x} \mid \mathbf{d}) \approx \frac{L(\mathbf{x} \mid \mathbf{d}) p(\mathbf{x})}
+{\sum_{i=1}^N L\left(\mathbf{x}_i \mid \mathbf{d}\right) p\left(\mathbf{x}_i\right) \Delta \mathbf{x}_i}\]</div>
+<p>Metropolis Hastings estimation directly draw samples from the unnormalized posterior distribution, namely
+the numerator of equation <a class="reference internal" href="#equation-bayes">(1)</a>. The samples are then used to estimate properties of the posterior
+distribution, like the mean and variance, or to estimate the posterior distribution.</p>
+<section id="gridestimation-class">
+<h2>GridEstimation Class<a class="headerlink" href="#gridestimation-class" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="#psimpy.inference.bayes_inference.GridEstimation" title="psimpy.inference.bayes_inference.GridEstimation"><code class="xref py py-class docutils literal notranslate"><span class="pre">GridEstimation</span></code></a> class is imported by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.inference.bayes_inference</span> <span class="kn">import</span> <span class="n">GridEstimation</span>
+</pre></div>
+</div>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="psimpy.inference.bayes_inference.GridEstimation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">GridEstimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ln_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ln_likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ln_pxl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_ln_pxl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_ln_pxl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/inference/bayes_inference.html#GridEstimation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.inference.bayes_inference.GridEstimation" title="Link to this definition"></a></dt>
+<dd><p>Set up basic input for Bayesian inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> (<em>int</em>) – Dimension of parameter <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>bounds</strong> (<em>numpy array</em>) – Upper and lower boundaries of each parameter.
+Shape <code class="code docutils literal notranslate"><span class="pre">(ndim,</span> <span class="pre">2)</span></code>.
+<cite>bounds[:, 0]</cite> corresponds to lower boundaries of each parameter and
+<cite>bounds[:, 1]</cite> to upper boundaries of each parameter.</p></li>
+<li><p><strong>prior</strong> (<em>Callable</em>) – Prior probability density function.
+Call with <code class="code docutils literal notranslate"><span class="pre">prior(x,</span> <span class="pre">*args_prior,</span> <span class="pre">**kwgs_prior)</span></code>.
+Return the prior probability density value at <code class="docutils literal notranslate"><span class="pre">x</span></code>, where <code class="docutils literal notranslate"><span class="pre">x</span></code> is
+a one dimension <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of shape <code class="code docutils literal notranslate"><span class="pre">(ndim,)</span></code>.</p></li>
+<li><p><strong>likelihood</strong> (<em>Callable</em>) – Likelihood function.
+Call with <code class="code docutils literal notranslate"><span class="pre">likelihood(x,</span> <span class="pre">*args_likelihood,</span> <span class="pre">**kwgs_likelihood)</span></code>.
+Return the likelihood value at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>ln_prior</strong> (<em>Callable</em>) – Natural logarithm of prior probability density function.
+Call with <code class="code docutils literal notranslate"><span class="pre">ln_prior(x,</span> <span class="pre">*args_prior,</span> <span class="pre">**kwgs_prior)</span></code>.
+Return the value of natural logarithm of prior probability density
+at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>ln_likelihood</strong> (<em>Callable</em>) – Natural logarithm of likelihood function.
+Call with <code class="code docutils literal notranslate"><span class="pre">ln_likelihood(x,</span> <span class="pre">*args_likelihood,</span> <span class="pre">**kwgs_likelihood)</span></code>.
+Return the value of natural logarithm of likelihood at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>ln_pxl</strong> (<em>Callable</em>) – Natural logarithm of the product of prior and likelihood.
+Call with <code class="code docutils literal notranslate"><span class="pre">ln_pxl(x,</span> <span class="pre">*args_ln_pxl,</span> <span class="pre">**kwgs_ln_pxl)</span></code>.
+Return the value of natural logarithm of the product of prior and
+likelihood at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>args_prior</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">prior</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_prior</span></code>.</p></li>
+<li><p><strong>kwgs_prior</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">prior</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_prior</span></code>.</p></li>
+<li><p><strong>args_likelihood</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">likelihood</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_likelihood</span></code>.</p></li>
+<li><p><strong>kwgs_likelihood</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">likelihood</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_likelihood</span></code>.</p></li>
+<li><p><strong>args_ln_pxl</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">ln_pxl</span></code>.</p></li>
+<li><p><strong>kwgs_ln_pxl</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">ln_pxl</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.inference.bayes_inference.GridEstimation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nbins</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/inference/bayes_inference.html#GridEstimation.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.inference.bayes_inference.GridEstimation.run" title="Link to this definition"></a></dt>
+<dd><p>Use Grid approximation to estimate the posterior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nbins</strong> (<em>int</em><em> or </em><em>list</em><em> of </em><em>ints</em>) – Number of bins for each parameter.
+If <cite>int</cite>, the same value is used for each parameter.
+If <cite>list of int</cite>, it should be of length <code class="docutils literal notranslate"><span class="pre">ndim</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">list</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>posterior</strong> (<em>numpy array</em>) – Estimated posterior probability density values at grid points.
+Shape of <code class="code docutils literal notranslate"><span class="pre">(nbins[0],</span> <span class="pre">nbins[1],</span> <span class="pre">...,</span> <span class="pre">nbins[ndim])</span></code>.</p></li>
+<li><p><strong>x_ndim</strong> (<em>list of numpy array</em>) – Contain <code class="docutils literal notranslate"><span class="pre">ndim</span></code> 1d <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> <cite>x1</cite>, <cite>x2</cite>, … Each <cite>xi</cite>
+is a 1d array of length <code class="docutils literal notranslate"><span class="pre">nbins[i]</span></code>, representing the 1d coordinate
+array along the i-th axis.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+<section id="metropolishastingsestimation-class">
+<h2>MetropolisHastingsEstimation Class<a class="headerlink" href="#metropolishastingsestimation-class" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="#psimpy.inference.bayes_inference.MetropolisHastingsEstimation" title="psimpy.inference.bayes_inference.MetropolisHastingsEstimation"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetropolisHastingsEstimation</span></code></a> class is imported by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.inference.bayes_inference</span> <span class="kn">import</span> <span class="n">MetropolisHastingsEstimation</span>
+</pre></div>
+</div>
+<section id="id1">
+<h3>Methods<a class="headerlink" href="#id1" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="psimpy.inference.bayes_inference.MetropolisHastingsEstimation">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetropolisHastingsEstimation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ln_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ln_likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ln_pxl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_prior</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_likelihood</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_ln_pxl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_ln_pxl</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/inference/bayes_inference.html#MetropolisHastingsEstimation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.inference.bayes_inference.MetropolisHastingsEstimation" title="Link to this definition"></a></dt>
+<dd><p>Set up basic input for Bayesian inference.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> (<em>int</em>) – Dimension of parameter <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>bounds</strong> (<em>numpy array</em>) – Upper and lower boundaries of each parameter.
+Shape <code class="code docutils literal notranslate"><span class="pre">(ndim,</span> <span class="pre">2)</span></code>.
+<cite>bounds[:, 0]</cite> corresponds to lower boundaries of each parameter and
+<cite>bounds[:, 1]</cite> to upper boundaries of each parameter.</p></li>
+<li><p><strong>prior</strong> (<em>Callable</em>) – Prior probability density function.
+Call with <code class="code docutils literal notranslate"><span class="pre">prior(x,</span> <span class="pre">*args_prior,</span> <span class="pre">**kwgs_prior)</span></code>.
+Return the prior probability density value at <code class="docutils literal notranslate"><span class="pre">x</span></code>, where <code class="docutils literal notranslate"><span class="pre">x</span></code> is
+a one dimension <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of shape <code class="code docutils literal notranslate"><span class="pre">(ndim,)</span></code>.</p></li>
+<li><p><strong>likelihood</strong> (<em>Callable</em>) – Likelihood function.
+Call with <code class="code docutils literal notranslate"><span class="pre">likelihood(x,</span> <span class="pre">*args_likelihood,</span> <span class="pre">**kwgs_likelihood)</span></code>.
+Return the likelihood value at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>ln_prior</strong> (<em>Callable</em>) – Natural logarithm of prior probability density function.
+Call with <code class="code docutils literal notranslate"><span class="pre">ln_prior(x,</span> <span class="pre">*args_prior,</span> <span class="pre">**kwgs_prior)</span></code>.
+Return the value of natural logarithm of prior probability density
+at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>ln_likelihood</strong> (<em>Callable</em>) – Natural logarithm of likelihood function.
+Call with <code class="code docutils literal notranslate"><span class="pre">ln_likelihood(x,</span> <span class="pre">*args_likelihood,</span> <span class="pre">**kwgs_likelihood)</span></code>.
+Return the value of natural logarithm of likelihood at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>ln_pxl</strong> (<em>Callable</em>) – Natural logarithm of the product of prior and likelihood.
+Call with <code class="code docutils literal notranslate"><span class="pre">ln_pxl(x,</span> <span class="pre">*args_ln_pxl,</span> <span class="pre">**kwgs_ln_pxl)</span></code>.
+Return the value of natural logarithm of the product of prior and
+likelihood at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>args_prior</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">prior</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_prior</span></code>.</p></li>
+<li><p><strong>kwgs_prior</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">prior</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_prior</span></code>.</p></li>
+<li><p><strong>args_likelihood</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">likelihood</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_likelihood</span></code>.</p></li>
+<li><p><strong>kwgs_likelihood</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">likelihood</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_likelihood</span></code>.</p></li>
+<li><p><strong>args_ln_pxl</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">ln_pxl</span></code>.</p></li>
+<li><p><strong>kwgs_ln_pxl</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">ln_pxl</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.inference.bayes_inference.MetropolisHastingsEstimation.run">
+<span class="sig-name descname"><span class="pre">run</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nsamples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mh_sampler</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/inference/bayes_inference.html#MetropolisHastingsEstimation.run"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.inference.bayes_inference.MetropolisHastingsEstimation.run" title="Link to this definition"></a></dt>
+<dd><p>Use Metropolis Hastings sampling to draw samples from the posterior.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to be drawn.</p></li>
+<li><p><strong>mh_sampler</strong> (instance of <a class="reference internal" href="../sampler/metropolis_hastings.html#psimpy.sampler.metropolis_hastings.MetropolisHastings" title="psimpy.sampler.metropolis_hastings.MetropolisHastings"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetropolisHastings</span></code></a>) – Metropolis Hastings sampler.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>mh_samples</strong> (<em>numpy array</em>) – Samples drawn from the posterior. Shape of <code class="code docutils literal notranslate"><span class="pre">(nsamples,</span> <span class="pre">ndim)</span></code>.</p></li>
+<li><p><strong>mh_accept</strong> (<em>numpy array</em>) – Shape of <code class="code docutils literal notranslate"><span class="pre">(nsamples,)</span></code>. Each element indicates whether the
+corresponding sample is the proposed new state (value 1) or the old
+state (value 0). <code class="code docutils literal notranslate"><span class="pre">np.mean(mh_accept)</span></code> thus gives the overall
+acceptance ratio.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="active_learning.html" class="btn btn-neutral float-left" title="Active Learning" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="../sampler/index.html" class="btn btn-neutral float-right" title="Sampler" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

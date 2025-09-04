@@ -1,0 +1,213 @@
+"""
+
+Sobol' analysis
+===============
+"""
+
+# %% md
+# 
+# This example shows how to compute Sobol' sensitivity indices using
+# the :class:`.SobolAnalyze` class. 
+#
+# Let us consider the Ishigami function :cite:p:`LeGratiet2014`
+# 
+# :math:`y=f\left(x_1, x_2, x_3\right)=\sin \left(x_1\right)+7 \sin \left(\mathrm{x}_2\right)^2+0.1 x_3^4 \sin \left(x_1\right)`
+#
+# where :math:`x_i` is uniformly distributed on :math:`[-\pi, \pi]` for :math:`i \in [1,2,3]`. We define the function as follows:
+
+import numpy as np
+
+def f(x1,x2,x3):
+    return np.sin(x1) + 7*np.sin(x2)**2 + 0.1*x3**4*np.sin(x1)
+
+
+# %% md
+# 
+# The variation of each :math:`x_i` leads to the variation of :math:`y`. Sobol' analysis is used to quantify the contribution
+# of each :math:`x_i` and their interactions to the variation of :math:`y`. Steps of a Sobol' analysis are:
+#
+#  #. Draw samples of input.
+#  #. Evaluate the model at each input sample to obtain model output.
+#  #. Compute Sobol' indices based on model outputs.
+# 
+
+from psimpy.sampler import Saltelli
+from psimpy.sensitivity import SobolAnalyze
+
+ndim = 3
+bounds = np.array([[-np.pi, np.pi], [-np.pi, np.pi], [-np.pi, np.pi]])
+calc_second_order = False
+nbase = 1024
+
+# draw Saltelli samples
+saltelli_sampler = Saltelli(ndim, bounds, calc_second_order)
+saltelli_samples = saltelli_sampler.sample(nbase)
+
+# Evaluate the model to obtain model outputs
+Y = f(saltelli_samples[:,0], saltelli_samples[:,1], saltelli_samples[:, 2])
+
+# Compute Sobol' indices
+sobol_analyzer = SobolAnalyze(ndim, Y, calc_second_order, seed=2)
+S_res = sobol_analyzer.run()
+
+print("Estimated first-order Sobol' index: ", S_res['S1'][:,0])
+print("Analytical solution: [0.314, 0.442, 0]")
+
+
+# %% md
+# 
+# Figure below shows the results. The bar plots represent estimated first-order
+# and total-effect Sobol' indices, as well as their 95% confidence interval. The
+# red stars represent true values of the first-order Sobol' indices.
+#
+
+import matplotlib.pyplot as plt
+
+name_vars = [r'$x_1$',r'$x_2$',r'$x_3$']
+x = {'S1':[1,4,7], 'ST':[2,5,8]}
+color = {'S1':'#69b3a2', 'ST':'#3399e6'}
+width=0.8
+capsize=3
+
+fig, ax1 = plt.subplots(figsize=(4,3))
+
+# estimated first-order Sobol' indices and their confidence interval
+ax1.bar(x['S1'], S_res['S1'][:,0], width=width, yerr=S_res['S1'][:,2], color=color['S1'], capsize=capsize)
+
+ax1.axis([0,9,0,0.7])
+ax1.set_xticks([1.5,4.5,7.5])
+ax1.set_xticklabels(name_vars)
+ax1.tick_params(axis='both',bottom=False)
+ax1.tick_params(axis="y", labelcolor=color['S1'])
+ax1.yaxis.grid(True, linestyle='--', which='major', color='grey', alpha=.25)
+ax1.set_ylabel('First-order index', color=color['S1'])
+
+# analytical solution for first-order indices
+ax1.scatter(x['S1'], [0.314, 0.442, 0], s=30, c='red', marker='*')
+
+
+# estimated total-effect Sobol' indices and their confidence interval
+ax2 = ax1.twinx()
+ax2.bar(x['ST'], S_res['ST'][:,0], width=width, yerr=S_res['ST'][:,2], color=color['ST'], capsize=capsize)
+
+ax2.axis([0,9,0,0.7])
+ax2.set_xticks([1.5,4.5,7.5])
+ax2.tick_params(axis='both',bottom=False)
+ax2.tick_params(axis="y", labelcolor=color['ST'])
+ax2.yaxis.grid(True, linestyle='--', which='major', color='grey', alpha=.25)
+ax2.set_ylabel('Total-effect index', color=color['ST'])
+
+plt.tight_layout()
+
+
+# %% md
+# .. note:: The interaction between one parameter and all other parameters can be
+#     quantified by the difference between its first-order and total-effet Sobol'
+#     indices. If detailed information on interaction between any two parameters
+#     is needed, one can set ``calc_second_order`` to `True`.
+#  
+
+
+# %% md
+#
+# **Many models of interest in real-world applications are very computationally
+# expensive. In that case, we resort to emulation techniques in order to efficiently
+# conduct Sobol' analysis.** See :cite:t:`Zhao2021a` for the detailed theory.
+# 
+# Steps of such an analysis are:
+# 
+#  #. Draw input samples for emulator training.
+#  #. Evaluate the model at each training input point to obtain training data.
+#  #. Train an emulator for the computationally expensive model of interest.
+#  #. Draw samples of input for Sobol' analysis.
+#  #. Evaluate the emulator at each input sample at step 3 to obtain approximated model outputs.
+#  #. Compute Sobol' indices based on approximated model outputs.
+#
+# Assume that the above Ishigami function is computationally expensive, an emulator-based
+# Sobol' analysis can be conducted as follows:
+#
+
+import numpy as np
+from psimpy.sampler import LHS
+from psimpy.emulator import ScalarGaSP
+from psimpy.sampler import Saltelli
+from psimpy.sensitivity import SobolAnalyze
+
+# define the model
+def f(x1,x2,x3):
+    return np.sin(x1) + 7*np.sin(x2)**2 + 0.1*x3**4*np.sin(x1)
+
+ndim = 3
+bounds = np.array([[-np.pi, np.pi], [-np.pi, np.pi], [-np.pi, np.pi]])
+seed = 2
+
+# draw 100 input samples for emulator training using Latin hypercube sampling
+lhs_sampler = LHS(ndim, bounds, seed, criterion='maximin', iteration=200)
+design = lhs_sampler.sample(nsamples=100)
+
+# evaluate the model at each training input point
+response = f(design[:,0], design[:,1], design[:,2])
+
+# train an emulator
+scalar_gasp = ScalarGaSP(ndim)
+scalar_gasp.train(design, response)
+
+# the trained emulator needs to be validated before moving on
+# here we leave out this step for simplicity...
+
+# draw samples of input for Sobol' analysis
+calc_second_order = False
+nbase = 1024
+
+saltelli_sampler = Saltelli(ndim, bounds, calc_second_order)
+saltelli_samples = saltelli_sampler.sample(nbase)
+
+# evaluate the emulator to obtain approximated model output.
+# in order to take emulator-induced uncertainty into account, we draw 50 realizations
+# from the emulator
+Y = scalar_gasp.sample(saltelli_samples, 50)
+
+# Compute Sobol' indices based on approximated model outputs
+sobol_analyzer = SobolAnalyze(ndim, Y, calc_second_order, seed=seed)
+S_res = sobol_analyzer.run(mode='parallel', max_workers=5)
+
+print("\n")
+print("Emulator-based first-order Sobol' index: ", S_res['S1'][:,0])
+print("Analytical solution: [0.314, 0.442, 0]")
+
+# %% md
+# The following figure shows how the results of emulator-based Sobol' analysis
+# look like.
+#
+
+import matplotlib.pyplot as plt
+
+name_vars = [r'$x_1$',r'$x_2$',r'$x_3$']
+x = {'S1':[1,4,7], 'ST':[2,5,8]}
+color = {'S1':'#69b3a2', 'ST':'#3399e6'}
+width=0.8
+capsize=3
+
+fig, ax1 = plt.subplots(figsize=(4,3))
+
+ax1.bar(x['S1'], S_res['S1'][:,0], width=width, yerr=S_res['S1'][:,2], color=color['S1'], capsize=capsize)
+ax1.axis([0,9,0,0.7])
+ax1.set_xticks([1.5,4.5,7.5])
+ax1.set_xticklabels(name_vars)
+ax1.tick_params(axis='both',bottom=False)
+ax1.tick_params(axis="y", labelcolor=color['S1'])
+ax1.yaxis.grid(True, linestyle='--', which='major', color='grey', alpha=.25)
+ax1.set_ylabel('First-order index', color=color['S1'])
+
+ax1.scatter(x['S1'], [0.314, 0.442, 0], s=30, c='red', marker='*')
+
+ax2 = ax1.twinx()
+ax2.bar(x['ST'], S_res['ST'][:,0], width=width, yerr=S_res['ST'][:,2], color=color['ST'], capsize=capsize)
+ax2.axis([0,9,0,0.7])
+ax2.set_xticks([1.5,4.5,7.5])
+ax2.tick_params(axis='both',bottom=False)
+ax2.tick_params(axis="y", labelcolor=color['ST'])
+ax2.yaxis.grid(True, linestyle='--', which='major', color='grey', alpha=.25)
+ax2.set_ylabel('Total-effect index', color=color['ST'])
+
+plt.tight_layout()

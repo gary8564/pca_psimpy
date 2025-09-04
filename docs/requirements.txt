@@ -1,0 +1,5 @@
+sphinx_rtd_theme
+sphinx_autodoc_typehints
+sphinxcontrib_bibtex
+sphinx_gallery
+psimpy # readthedocs build fails due to R_HOME

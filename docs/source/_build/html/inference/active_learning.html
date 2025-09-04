@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Active Learning &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Bayes Inference" href="bayes_inference.html" />
+    <link rel="prev" title="Inference" href="index.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API &amp; Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../emulator/index.html">Emulator</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Inference</a><ul class="current">
+<li class="toctree-l3 current"><a class="current reference internal" href="#"> Active Learning</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#activelearning-class">ActiveLearning Class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="bayes_inference.html"> Bayes Inference</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../sampler/index.html">Sampler</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../sensitivity/index.html">Sensitivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simulator/index.html">Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API &amp; Theory</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Inference</a></li>
+      <li class="breadcrumb-item active">Active Learning</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/inference/active_learning.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="active-learning">
+<h1>Active Learning<a class="headerlink" href="#active-learning" title="Link to this heading"></a></h1>
+<p>Active learning is a machine learning technique that involves selecting the most
+informative data points for the purpose of training an emulator. The idea behind
+active learning is to reduce the amount of training data required for a machine
+learning model to achieve a certain level of accuracy. This is achieved by iteratively
+choosing a new data point that is expected to be the most informative.</p>
+<p>In this module, the <a class="reference internal" href="#psimpy.inference.active_learning.ActiveLearning" title="psimpy.inference.active_learning.ActiveLearning"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActiveLearning</span></code></a> class is implemented to actively build a
+Gaussian process emulator for the natural logarithm of the unnormalized posterior in
+Bayesian inference. It is supposed to facilitate efficient parameter calibration of
+computationally expensive simulators. For detailed theories, please refer to
+<span id="id1">Wang and Li [<a class="reference internal" href="../refs.html#id13" title="Hong Qiao Wang and Jing Lai Li. Adaptive Gaussian process approximation for Bayesian inference with expensive likelihood functions. Neural Computation, 30(11):3072–3094, 2018. doi:10.1162/neco_a_01127.">2018</a>]</span>, <span id="id2">Kandasamy <em>et al.</em> [<a class="reference internal" href="../refs.html#id8" title="Kirthevasan Kandasamy, Jeff Schneider, and Barnabás Póczos. Query efficient posterior estimation in scientific experiments via Bayesian active learning. Artificial Intelligence, 243:45–56, 2017. doi:https://doi.org/10.1016/j.artint.2016.11.002.">2017</a>]</span>, and <span id="id3">Zhao and Kowalski [<a class="reference internal" href="../refs.html#id16" title="Hu Zhao and Julia Kowalski. Bayesian active learning for parameter calibration of landslide run-out models. Landslides, 19():2033–2045, 2022. doi:https://doi.org/10.1007/s10346-022-01857-z.">2022</a>]</span>.</p>
+<section id="activelearning-class">
+<h2>ActiveLearning Class<a class="headerlink" href="#activelearning-class" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="#psimpy.inference.active_learning.ActiveLearning" title="psimpy.inference.active_learning.ActiveLearning"><code class="xref py py-class docutils literal notranslate"><span class="pre">ActiveLearning</span></code></a> class is imported by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.inference.active_learning</span> <span class="kn">import</span> <span class="n">ActiveLearning</span>
+</pre></div>
+</div>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="psimpy.inference.active_learning.ActiveLearning">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">ActiveLearning</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">run_sim_obj</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prior</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">likelihood</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lhs_sampler</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_gasp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">scalar_gasp_trend='constant'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">indicator='entropy'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">optimizer=&lt;function</span> <span class="pre">brute&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_prior=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_prior=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_likelihood=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_likelihood=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_optimizer=None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_optimizer=None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/inference/active_learning.html#ActiveLearning"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.inference.active_learning.ActiveLearning" title="Link to this definition"></a></dt>
+<dd><p>Contruct a scalar GP emulator for natural logarithm  of the product of
+prior and likelihood (i.e. unnormalized posterior), via active learning.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> (<em>int</em>) – Dimension of parameter <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>bounds</strong> (<em>numpy array</em>) – Upper and lower boundaries of each parameter. Shape <code class="code docutils literal notranslate"><span class="pre">(ndim,</span> <span class="pre">2)</span></code>.
+<cite>bounds[:, 0]</cite> corresponds to lower boundaries of each parameter and
+<cite>bounds[:, 1]</cite> to upper boundaries of each parameter.</p></li>
+<li><p><strong>data</strong> (<em>numpy array</em>) – Observed data for parameter calibration.</p></li>
+<li><p><strong>run_sim_obj</strong> (instance of class <a class="reference internal" href="../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator" title="psimpy.simulator.run_simulator.RunSimulator"><code class="xref py py-class docutils literal notranslate"><span class="pre">RunSimulator</span></code></a>) – It has an attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">simulator</span></code> and two methods to run
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">simulator</span></code>, namely <a class="reference internal" href="../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator.serial_run" title="psimpy.simulator.run_simulator.RunSimulator.serial_run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">serial_run()</span></code></a> and
+<a class="reference internal" href="../simulator/run_simulator.html#psimpy.simulator.run_simulator.RunSimulator.parallel_run" title="psimpy.simulator.run_simulator.RunSimulator.parallel_run"><code class="xref py py-meth docutils literal notranslate"><span class="pre">parallel_run()</span></code></a>. For each simulation, <code class="xref py py-attr docutils literal notranslate"><span class="pre">simulator</span></code>
+must return outputs <code class="docutils literal notranslate"><span class="pre">y</span></code> as a numpy array.</p></li>
+<li><p><strong>prior</strong> (<em>Callable</em>) – Prior probability density function.
+Call with <code class="code docutils literal notranslate"><span class="pre">prior(x,</span> <span class="pre">*args_prior,</span> <span class="pre">**kwgs_prior)</span></code> and return
+the value of prior probability density at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>likelihood</strong> (<em>Callable</em>) – Likelihood function constructed based on <code class="docutils literal notranslate"><span class="pre">data</span></code> and simulation
+outputs <code class="docutils literal notranslate"><span class="pre">y</span></code> evaluated at <code class="docutils literal notranslate"><span class="pre">x</span></code>. Call with
+<code class="code docutils literal notranslate"><span class="pre">likelihood(y,</span> <span class="pre">data,</span> <span class="pre">*args_likelihood,</span> <span class="pre">**kwgs_likelihood)</span></code>
+and return the likelihood value at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>lhs_sampler</strong> (instance of class <a class="reference internal" href="../sampler/latin.html#psimpy.sampler.latin.LHS" title="psimpy.sampler.latin.LHS"><code class="xref py py-class docutils literal notranslate"><span class="pre">LHS</span></code></a>) – Latin hypercube sampler used to draw initial samples of <code class="docutils literal notranslate"><span class="pre">x</span></code>.
+These initial samples are used to run initial simulations and build
+initial emulator.</p></li>
+<li><p><strong>scalar_gasp</strong> (instance of class <a class="reference internal" href="../emulator/robustgasp.html#psimpy.emulator.robustgasp.ScalarGaSP" title="psimpy.emulator.robustgasp.ScalarGaSP"><code class="xref py py-class docutils literal notranslate"><span class="pre">ScalarGaSP</span></code></a>) – An object which sets up the emulator structure. Providing training
+data, the emulator can be trained and used to make predictions.</p></li>
+<li><p><strong>scalar_gasp_trend</strong> (<em>str</em><em> or </em><em>Callable</em><em>, </em><em>optional</em>) – Mean function of <code class="docutils literal notranslate"><span class="pre">scalar_gasp</span></code> emulator, which is used to
+determine the <code class="docutils literal notranslate"><span class="pre">trend</span></code> or <code class="docutils literal notranslate"><span class="pre">testing_trend</span></code> at given <code class="docutils literal notranslate"><span class="pre">design</span></code> or
+<code class="docutils literal notranslate"><span class="pre">testing_input</span></code>.
+<cite>‘zero’</cite> - trend is set to zero.
+<cite>‘constant’</cite> - trend is set to a constant.
+<cite>‘linear’</cite> - trend is linear to design or testing_input.
+Callable - a function takes design or testing_input as parameter
+and returns the trend.
+Default is <cite>‘constant’</cite>.</p></li>
+<li><p><strong>indicator</strong> (<em>str</em><em>, </em><em>optional</em>) – Indicator of uncertainty. <cite>‘entropy’</cite> or <cite>‘variance’</cite>. Default is
+<cite>‘entropy’</cite>.</p></li>
+<li><p><strong>optimizer</strong> (<em>Callable</em><em>, </em><em>optional</em>) – A function which finds the input point <code class="docutils literal notranslate"><span class="pre">x</span></code> that minimizes the
+uncertainty <code class="docutils literal notranslate"><span class="pre">indicator</span></code> at each iteration step.
+Call with <code class="code docutils literal notranslate"><span class="pre">optimizer(func,</span> <span class="pre">*args_optimizer,</span> <span class="pre">**kwgs_optimizer)</span></code>.
+The objective function <code class="docutils literal notranslate"><span class="pre">func</span></code> is defined by the class method
+<code class="xref py py-meth docutils literal notranslate"><span class="pre">_uncertainty_indicator()</span></code> which have only one argument <code class="docutils literal notranslate"><span class="pre">x</span></code>.
+The <code class="docutils literal notranslate"><span class="pre">optimizer</span></code> should return either the solution array, or a
+<code class="xref py py-class docutils literal notranslate"><span class="pre">scipy.optimize.OptimizeResult</span></code> object which has the attribute
+<code class="xref py py-attr docutils literal notranslate"><span class="pre">x</span></code> denoting the solution array.
+By default is set to <code class="xref py py-func docutils literal notranslate"><span class="pre">scipy.optimize.brute()</span></code>.</p></li>
+<li><p><strong>args_prior</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">prior</span></code>.</p></li>
+<li><p><strong>kwgs_prior</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">prior</span></code>.</p></li>
+<li><p><strong>args_likelihood</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">likelihood</span></code>.</p></li>
+<li><p><strong>kwgs_likelihood</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">likelihood</span></code>.</p></li>
+<li><p><strong>args_optimizer</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>.</p></li>
+<li><p><strong>kwgs_optimizer</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.inference.active_learning.ActiveLearning.initial_simulation">
+<span class="sig-name descname"><span class="pre">initial_simulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">n0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prefixes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mode</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">'serial'</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_workers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/inference/active_learning.html#ActiveLearning.initial_simulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.inference.active_learning.ActiveLearning.initial_simulation" title="Link to this definition"></a></dt>
+<dd><p>Run <code class="docutils literal notranslate"><span class="pre">n0</span></code> initial simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n0</strong> (<em>int</em>) – Number of initial simulation runs.</p></li>
+<li><p><strong>prefixes</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – Consist of <code class="docutils literal notranslate"><span class="pre">n0</span></code> strings. Each is used to name corresponding
+simulation output file(s).
+If <cite>None</cite>, <cite>‘sim0’</cite>, <cite>‘sim1’</cite>, … are used.</p></li>
+<li><p><strong>mode</strong> (<em>str</em><em>, </em><em>optional</em>) – <cite>‘parallel’</cite> or <cite>‘serial’</cite>. Run <cite>n0</cite> simulations in parallel or
+in serial.</p></li>
+<li><p><strong>max_workers</strong> (<em>int</em><em>, </em><em>optional</em>) – Controls the maximum number of tasks running in parallel.
+Default is the number of CPUs on the host.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>init_var_samples</strong> (<em>numpy array</em>) – Variable input samples for <code class="docutils literal notranslate"><span class="pre">n0</span></code> initial simulations.
+Shape of <code class="code docutils literal notranslate"><span class="pre">(n0,</span> <span class="pre">ndim)</span></code>.</p></li>
+<li><p><strong>init_sim_outputs</strong> (<em>numpy array</em>) – Outputs of <code class="docutils literal notranslate"><span class="pre">n0</span></code> intial simulations.
+<code class="code docutils literal notranslate"><span class="pre">init_sim_outputs.shape[0]</span></code> is <code class="docutils literal notranslate"><span class="pre">n0</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.inference.active_learning.ActiveLearning.iterative_emulation">
+<span class="sig-name descname"><span class="pre">iterative_emulation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ninit</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_var_samples</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_sim_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">niter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iter_prefixes</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/inference/active_learning.html#ActiveLearning.iterative_emulation"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.inference.active_learning.ActiveLearning.iterative_emulation" title="Link to this definition"></a></dt>
+<dd><p>Sequentially pick <code class="docutils literal notranslate"><span class="pre">niter</span></code> new input points based on <code class="docutils literal notranslate"><span class="pre">ninit</span></code>
+simulations.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>niter</strong> (<em>int</em>) – Number of interative simulaitons.</p></li>
+<li><p><strong>ninit</strong> (<em>int</em>) – Number of initial simulations.</p></li>
+<li><p><strong>init_var_samples</strong> (<em>numpy array</em>) – Variable input samples for <code class="docutils literal notranslate"><span class="pre">ninit</span></code> simulations.
+Shape of <code class="code docutils literal notranslate"><span class="pre">(ninit,</span> <span class="pre">ndim)</span></code>.</p></li>
+<li><p><strong>init_sim_outputs</strong> (<em>numpy array</em>) – Outputs of <code class="docutils literal notranslate"><span class="pre">ninit</span></code> simulations.
+<code class="code docutils literal notranslate"><span class="pre">init_sim_outputs.shape[0]</span></code> is <code class="docutils literal notranslate"><span class="pre">ninit</span></code>.</p></li>
+<li><p><strong>iter_prefixes</strong> (<em>list</em><em> of </em><em>str</em><em>, </em><em>optional</em>) – Consist of <code class="docutils literal notranslate"><span class="pre">niter</span></code> strings. Each is used to name
+corresponding iterative simulation output file(s).
+If <cite>None</cite>, <cite>‘iter_sim0’</cite>, <cite>‘iter_sim1’</cite>, … are used.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>var_samples</strong> (<em>numpy array</em>) – Variable input samples of <code class="docutils literal notranslate"><span class="pre">ninit</span></code> simulations and <code class="docutils literal notranslate"><span class="pre">niter</span></code>
+iterative simulations. Shape of <code class="code docutils literal notranslate"><span class="pre">(ninit+niter,</span> <span class="pre">ndim)</span></code>.</p></li>
+<li><p><strong>sim_outputs</strong> (<em>numpy array</em>) – Outputs of <code class="docutils literal notranslate"><span class="pre">ninit</span></code> and <code class="docutils literal notranslate"><span class="pre">niter</span></code> simulations.
+<code class="code docutils literal notranslate"><span class="pre">sim_outputs.shape[0]</span></code> is <span class="math notranslate nohighlight">\(ninit+niter\)</span>.</p></li>
+<li><p><strong>ln_pxl_values</strong> (<em>numpy array</em>) – Natural logarithm values of the product of prior and likelihood
+at <code class="docutils literal notranslate"><span class="pre">ninit</span></code> and <code class="docutils literal notranslate"><span class="pre">niter</span></code> simulations.
+Shape of <code class="code docutils literal notranslate"><span class="pre">(ninit+niter,)</span></code>.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+<p class="rubric">Notes</p>
+<p>If a duplicated iteration point is returned by the <code class="docutils literal notranslate"><span class="pre">optimizer</span></code>, the
+iteration will be stopped right away. In that case, the first dimension
+of returned <code class="docutils literal notranslate"><span class="pre">var_samples</span></code>, <code class="docutils literal notranslate"><span class="pre">sim_outputs</span></code>, <code class="docutils literal notranslate"><span class="pre">ln_pxl_values</span></code> is smaller
+than <span class="math notranslate nohighlight">\(ninit+niter\)</span>.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.inference.active_learning.ActiveLearning.approx_ln_pxl">
+<span class="sig-name descname"><span class="pre">approx_ln_pxl</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/inference/active_learning.html#ActiveLearning.approx_ln_pxl"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.inference.active_learning.ActiveLearning.approx_ln_pxl" title="Link to this definition"></a></dt>
+<dd><p>Approximate <cite>ln_pxl</cite> value at <code class="docutils literal notranslate"><span class="pre">x</span></code> based on the trained emulator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>x</strong> (<em>numpy array</em>) – One variable sample at which <cite>ln_pxl</cite> is to be approximated. Shape of
+<code class="code docutils literal notranslate"><span class="pre">(ndim,)</span></code>.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>A float value which is the emulator-predicted <cite>ln_pxl</cite> value at <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="index.html" class="btn btn-neutral float-left" title="Inference" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="bayes_inference.html" class="btn btn-neutral float-right" title="Bayes Inference" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" >
+<head>
+  <meta charset="utf-8" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Metropolis Hastings Sampling &mdash; PSimPy&#39;s documentation</title>
+      <link rel="stylesheet" href="../_static/pygments.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/theme.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-binder.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-dataframe.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/sg_gallery-rendered-html.css" type="text/css" />
+      <link rel="stylesheet" href="../_static/css/custom.css" type="text/css" />
+  <!--[if lt IE 9]>
+    <script src="../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../_static/documentation_options.js?v=37f418d5"></script>
+        <script src="../_static/doctools.js?v=888ff710"></script>
+        <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
+        <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+    <script src="../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="Saltelli Sampling" href="saltelli.html" />
+    <link rel="prev" title="Latin Hypercube Sampling" href="latin.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../index.html" class="icon icon-home">
+            psimpy
+          </a>
+              <div class="version">
+                0.2.1
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../index.html">Home</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../quickstart.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="../api.html">API &amp; Theory</a><ul class="current">
+<li class="toctree-l2"><a class="reference internal" href="../emulator/index.html">Emulator</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../inference/index.html">Inference</a></li>
+<li class="toctree-l2 current"><a class="reference internal" href="index.html">Sampler</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="latin.html"> Latin Hypercube</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#"> Metropolis Hastings</a><ul>
+<li class="toctree-l4"><a class="reference internal" href="#metropolishastings-class">MetropolisHastings Class</a></li>
+</ul>
+</li>
+<li class="toctree-l3"><a class="reference internal" href="saltelli.html"> Saltelli</a></li>
+</ul>
+</li>
+<li class="toctree-l2"><a class="reference internal" href="../sensitivity/index.html">Sensitivity</a></li>
+<li class="toctree-l2"><a class="reference internal" href="../simulator/index.html">Simulator</a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../examples.html">Example Gallery</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changes</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../refs.html">References</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../index.html">psimpy</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../api.html">API &amp; Theory</a></li>
+          <li class="breadcrumb-item"><a href="index.html">Sampler</a></li>
+      <li class="breadcrumb-item active">Metropolis Hastings Sampling</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="../_sources/sampler/metropolis_hastings.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="metropolis-hastings-sampling">
+<h1>Metropolis Hastings Sampling<a class="headerlink" href="#metropolis-hastings-sampling" title="Link to this heading"></a></h1>
+<p>Metropolis Hastings sampling is a widely used Markov Chain Monte Carlo (MCMC)
+algorithm for generating a sequence of samples from a target probability
+distribution where direct sampling is difficult. The samples can be used to
+estimate properties of the target distribution, like its mean, variance, and higher
+moments. The samples can also be used to approximate the target distribution,
+for example via a histogram. The algorithm works by constructing a Markov chain
+with a stationary distribution equal to the target distribution.</p>
+<p>Steps of the algorithm are as follows:</p>
+<blockquote>
+<div><ol class="arabic simple">
+<li><p>Choose an initial state for the Markov chain, usually from the target distribution.</p></li>
+<li><p>At each iteration, propose a new state by sampling from a proposal distribution.</p></li>
+<li><p>Calculate the acceptance probability.</p></li>
+<li><p>Accept or reject the proposed state based on the acceptance probability.</p></li>
+<li><p>Repeat steps 2-4 for a large number of iterations to obtain a sequence of samples.</p></li>
+<li><p>Apply “burn-in” and “thining”.</p></li>
+</ol>
+</div></blockquote>
+<p>Final samples from the Markov chain can then be used to estimate the target
+distribution or its properties.</p>
+<section id="metropolishastings-class">
+<h2>MetropolisHastings Class<a class="headerlink" href="#metropolishastings-class" title="Link to this heading"></a></h2>
+<p>The <a class="reference internal" href="#psimpy.sampler.metropolis_hastings.MetropolisHastings" title="psimpy.sampler.metropolis_hastings.MetropolisHastings"><code class="xref py py-class docutils literal notranslate"><span class="pre">MetropolisHastings</span></code></a> class is imported by:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">psimpy.sampler.metropolis_hastings</span> <span class="kn">import</span> <span class="n">MetropolisHastings</span>
+</pre></div>
+</div>
+<section id="methods">
+<h3>Methods<a class="headerlink" href="#methods" title="Link to this heading"></a></h3>
+<dl class="py class">
+<dt class="sig sig-object py" id="psimpy.sampler.metropolis_hastings.MetropolisHastings">
+<em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">MetropolisHastings</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ndim</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_state</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_sample</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ln_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bounds</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">symmetric</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nburn</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">nthin</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">seed</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_target</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_f_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_f_sample</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">args_f_density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">kwgs_f_density</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/sampler/metropolis_hastings.html#MetropolisHastings"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.sampler.metropolis_hastings.MetropolisHastings" title="Link to this definition"></a></dt>
+<dd><p>Metropolis Hastings sampling.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ndim</strong> (<em>int</em>) – Dimension of parameter <code class="docutils literal notranslate"><span class="pre">x</span></code>.</p></li>
+<li><p><strong>init_state</strong> (<em>numpy array</em>) – Contains <code class="docutils literal notranslate"><span class="pre">ndim</span></code> numeric values representing the starting point of
+the Metropolis hastings chain. Shape <code class="code docutils literal notranslate"><span class="pre">(ndim,)</span></code>.</p></li>
+<li><p><strong>f_sample</strong> (<em>Callable</em>) – A function which proposes a new state <code class="docutils literal notranslate"><span class="pre">x'</span></code> given a current state
+<code class="docutils literal notranslate"><span class="pre">x</span></code>. Call with <code class="code docutils literal notranslate"><span class="pre">f_sample(x,</span> <span class="pre">*args_f_sample,</span> <span class="pre">**kwgs_f_sample)</span></code>.
+Return the proposed state <code class="docutils literal notranslate"><span class="pre">x'</span></code> as a <code class="xref py py-class docutils literal notranslate"><span class="pre">numpy.ndarray</span></code> of
+shape <code class="code docutils literal notranslate"><span class="pre">(ndim,)</span></code>. If <span class="math notranslate nohighlight">\(ndim=1\)</span>, <code class="docutils literal notranslate"><span class="pre">f_sample</span></code> may also
+return a scalar value.</p></li>
+<li><p><strong>target</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Target probability density function, up to a normalizing constant.
+Call with <code class="code docutils literal notranslate"><span class="pre">target(x,</span> <span class="pre">*args_target,</span> <span class="pre">**kwgs_target)</span></code>.
+Return the probability density value at <code class="docutils literal notranslate"><span class="pre">x</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">target</span></code> is not given, <code class="docutils literal notranslate"><span class="pre">ln_target</span></code> must be provided.</p></li>
+<li><p><strong>ln_target</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Natural logarithm of target probability density function.
+Call with <code class="code docutils literal notranslate"><span class="pre">ln_target(x,</span> <span class="pre">*args_target,</span> <span class="pre">**kwgs_target)</span></code>.
+Return the value of natural logarithm of target probability density
+value at <code class="docutils literal notranslate"><span class="pre">x</span></code>.
+If <code class="docutils literal notranslate"><span class="pre">ln_target</span></code> is not given, <code class="docutils literal notranslate"><span class="pre">target</span></code> must be provided.</p></li>
+<li><p><strong>bounds</strong> (<em>numpy array</em><em>, </em><em>optional</em>) – Upper and lower boundaries of each parameter. Shape <code class="code docutils literal notranslate"><span class="pre">(ndim,</span> <span class="pre">2)</span></code>.
+<cite>bounds[:, 0]</cite> corresponds to lower boundaries of each parameter and
+<cite>bounds[:, 1]</cite> to upper boundaries of each parameter.</p></li>
+<li><p><strong>f_density</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Call with <code class="code docutils literal notranslate"><span class="pre">f_density(x1,</span> <span class="pre">x2,</span> <span class="pre">*args_f_density,</span> <span class="pre">**kwgs_f_density)</span></code>.
+Return the probability density at state <code class="docutils literal notranslate"><span class="pre">x1</span></code> given state <code class="docutils literal notranslate"><span class="pre">x2</span></code>.
+It must be provided if <code class="docutils literal notranslate"><span class="pre">symmetric</span></code> is set to <cite>False</cite>.</p></li>
+<li><p><strong>symmetric</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether <code class="docutils literal notranslate"><span class="pre">f_density</span></code> is symmetric or asymmetric.</p></li>
+<li><p><strong>nburn</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of burnin. Default no burnin.</p></li>
+<li><p><strong>nthin</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of thining to reduce dependency. Default no thining.</p></li>
+<li><p><strong>seed</strong> (<em>int</em><em>, </em><em>optional</em>) – Seed to initialize the pseudo-random number generator.
+Default <cite>None</cite>.</p></li>
+<li><p><strong>args_target</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">target</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_target</span></code>.</p></li>
+<li><p><strong>kwgs_target</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">target</span></code> or <code class="docutils literal notranslate"><span class="pre">ln_target</span></code>.</p></li>
+<li><p><strong>args_f_sample</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">f_sample</span></code>.</p></li>
+<li><p><strong>kwgs_f_sample</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">f_sample</span></code>.</p></li>
+<li><p><strong>args_f_density</strong> (<em>list</em><em>, </em><em>optional</em>) – Positional arguments for <code class="docutils literal notranslate"><span class="pre">f_density</span></code>.</p></li>
+<li><p><strong>kwgs_f_density</strong> (<em>dict</em><em>, </em><em>optional</em>) – Keyword arguments for <code class="docutils literal notranslate"><span class="pre">f_density</span></code>.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="psimpy.sampler.metropolis_hastings.MetropolisHastings.sample">
+<span class="sig-name descname"><span class="pre">sample</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nsamples</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/psimpy/sampler/metropolis_hastings.html#MetropolisHastings.sample"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#psimpy.sampler.metropolis_hastings.MetropolisHastings.sample" title="Link to this definition"></a></dt>
+<dd><p>Draw samples.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>nsamples</strong> (<em>int</em>) – Number of samples to be drawn.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><span class="sphinx_autodoc_typehints-type"><code class="xref py py-class docutils literal notranslate"><span class="pre">tuple</span></code>[<code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>, <code class="xref py py-class docutils literal notranslate"><span class="pre">ndarray</span></code>]</span></p>
+</dd>
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p><ul class="simple">
+<li><p><strong>mh_samples</strong> (<em>numpy array</em>) – Samples drawn from <code class="docutils literal notranslate"><span class="pre">target</span></code>. Shape <code class="code docutils literal notranslate"><span class="pre">(nsamples,</span> <span class="pre">ndim)</span></code>.</p></li>
+<li><p><strong>mh_accept</strong> (<em>numpy array</em>) – Shape of <code class="code docutils literal notranslate"><span class="pre">(nsamples,)</span></code>. Each element indicates whether the
+corresponding sample is the proposed new state (value 1) or the old
+state (value 0). <code class="code docutils literal notranslate"><span class="pre">np.mean(mh_accept)</span></code> thus gives the overall
+acceptance ratio.</p></li>
+</ul>
+</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</section>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="latin.html" class="btn btn-neutral float-left" title="Latin Hypercube Sampling" accesskey="p" rel="prev"><span class="fa fa-arrow-circle-left" aria-hidden="true"></span> Previous</a>
+        <a href="saltelli.html" class="btn btn-neutral float-right" title="Saltelli Sampling" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Hu Zhao.</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>

@@ -261,7 +261,7 @@ class PCAPPGaSP:
         samples = self.emulator.sample(testing_input, nsamples, testing_trend)
         if self.output_dim_reducer is not None:
             ntest, n_reduced, _ = samples.shape
-            original_dim = self.output_dim_reducer.reducer.model.n_features_ if isinstance(self.output_dim_reducer.reducer, LinearPCA) else self.output_dim_reducer.reducer.model.n_features_in_
+            original_dim = self.output_dim_reducer.reducer.model.n_features_in_
             samples_flat = samples.transpose(0, 2, 1).reshape(ntest * nsamples, n_reduced)
             orig_flat = self.output_dim_reducer.inverse_transform(samples_flat)
             orig_flat = self.output_scaler.inverse_transform(orig_flat)

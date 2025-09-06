@@ -199,12 +199,16 @@ class PCAPPGaSP:
         print(f"Training PCAPPGaSP takes {training_time:.3f} s")
         return training_time
         
-    def predict(self, testing_input: np.ndarray, testing_trend: Optional[np.ndarray] = None):
+    def predict(self, 
+                testing_input: np.ndarray,
+                testing_trend: Optional[np.ndarray] = None, 
+                uncertainty_reconstruction: bool = False):
         """
         Args:
             testing_input (np.ndarray): input data for inference
             testing_trend (Optional[np.ndarray], optional): trend function. Defaults to None.
-
+            uncertainty_reconstruction (bool, optional): whether to propagate the uncertainty quantification from latent reduced space to original dimension space. Defaults to False.
+            
         Returns:
             predictions_latent: predictions in latent space 
                 Shape :code:`(n_test, n_latent_dim, 4)`.
@@ -242,13 +246,19 @@ class PCAPPGaSP:
             print(f"Inference PCAPPGaSP takes {infer_time:.3f} s")
 
             # Post-process predictions
-            predictions_mean_orig, _, _, _ = self._postprocess_testing_output(predictions_latent)            
+            predictions_mean_orig, lower_CI, upper_CI, std_orig = self._postprocess_testing_output(predictions_latent, uncertainty_reconstruction)            
+            if lower_CI is not None and upper_CI is not None and std_orig is not None:
+                predictive_uncertainties = np.dstack([lower_CI, upper_CI, std_orig])
+            else:
+                predictive_uncertainties = None
+            
             # Verify output dimensions
             if self.output_dim_reducer is not None:
                 assert predictions_mean_orig.shape[1] == self.original_output_dim, \
                     f"Output has {predictions_mean_orig.shape[1]} dimensions, expected {self.original_output_dim}"
                 
-            return predictions_latent, predictions_mean_orig, infer_time
+            return predictions_latent, predictions_mean_orig, infer_time, predictive_uncertainties
+        
         except NotImplementedError:
             raise
         except Exception as e:

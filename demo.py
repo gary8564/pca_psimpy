@@ -88,6 +88,69 @@ def reconstruct_output_image(output, rows, cols, valid_cols):
     print("Reconstructed output image dimension: ", output_hmax.shape)
     return output_hmax, output_mean, output_std
 
+
+def viz_prediction(ground_truth: np.ndarray, 
+                   predictions: np.ndarray, 
+                   is_in_latent_space=False, 
+                   threshold: float = 0.5):
+    if ground_truth.ndim == 1:
+        ground_truth = ground_truth.reshape(-1, 1)
+    if predictions.ndim == 2 and ground_truth.shape[1] == 1:
+        prediction_mean = predictions[:, 0]
+        prediction_std = predictions[:, 1]
+    elif predictions.ndim == 2:
+        prediction_mean = predictions
+        prediction_std = None
+    elif predictions.ndim == 3:
+        prediction_mean = predictions[:, :, 0]
+        prediction_std = predictions[:, :, 1]
+    else:
+        raise ValueError(f"The dimension of predictions must be 2d or 3d np.ndarray, but got {predictions.ndim}.")
+    title = "Prediction v.s. Ground-truth for PCAPPGaSP Model"
+    if is_in_latent_space:
+        title += " in latent space"
+    plt.figure()
+    y_true = ground_truth.flatten()
+    y_pred = prediction_mean.flatten()
+    if not is_in_latent_space:
+        y_true = np.where(y_true < threshold, 0, y_true)
+        y_pred = np.where(y_pred < threshold, 0, y_pred)
+    plt.plot([np.min(y_true),np.max(y_true)], [np.min(y_true),np.max(y_true)], color='black')
+    if prediction_std is not None:
+        pred_std = prediction_std.flatten()
+        plt.errorbar(y_true, y_pred, 
+                     yerr=pred_std, 
+                     fmt='o', 
+                     markersize=6,
+                     markeredgewidth=1.0,
+                     markerfacecolor='None',
+                     ecolor='lightsteelblue',
+                     elinewidth=0.5,
+                     capsize=2,
+                     alpha=0.8,  
+                     label='emulator prediction ± std',
+                     zorder=1)
+    else:
+        plt.errorbar(y_true, y_pred, 
+                     fmt='o', 
+                     markersize=6,
+                     markeredgewidth=1.0,
+                     markerfacecolor='None',
+                     ecolor='lightsteelblue',
+                     elinewidth=0.5,
+                     capsize=2, 
+                     alpha=0.8,  
+                     label='emulator prediction', 
+                     zorder=1)    
+    plt.xlabel('Actual y')
+    plt.ylabel('Predicted y')
+    plt.xlim(np.min(y_true),np.max(y_true))
+    plt.ylim(np.min(y_true),np.max(y_true))
+    plt.legend()
+    plt.tight_layout()
+    plt.title(title)
+    plt.show()
+    
 def viz_output_image(hill_path, mean_gt, std_gt, mean_pred, std_pred) -> None:
     """Visualize the reconstructed output image
 
@@ -243,9 +306,9 @@ print(f"Test_X: {test_X.shape}, Test_Y: {test_Y.shape}")
 
 # Define the dimensionality reduction and Gaussian Process (GP) model
 input_reducer  = None
-# output_pca_model = LinearPCA()
+output_pca_model = LinearPCA(n_components=20)
 # output_pca_model._compute_n_components(train_Y)
-output_pca_model = NonlinearPCA(n_components=7, alpha=0.0001)
+# output_pca_model = NonlinearPCA(n_components=20, alpha=0.0001)
 output_reducer = OutputDimReducer(output_pca_model)
 model = PCAPPGaSP(
     ndim=reduced_dim(input_reducer, train_X),
@@ -257,11 +320,19 @@ model = PCAPPGaSP(
 _ = model.train(train_X, train_Y)
 
 # Inference
-predictions_latent, predictions_original, _ = model.predict(test_X)         
+predictions_latent, predictions_original, infer_time, predictive_uncertainties = model.predict(test_X, uncertainty_reconstruction=True) 
+predictions_original = np.where(predictions_original < 0.5, 0, predictions_original)
+predictions_lower = predictive_uncertainties[:, :, 0]
+predictions_upper = predictive_uncertainties[:, :, 1]
+predictions_std = predictive_uncertainties[:, :, 2]
+predictions_lower = np.where(predictions_original < 0.5, 0, predictions_lower)
+predictions_upper = np.where(predictions_original < 0.5, 0, predictions_upper)
+predictions_std = np.where(predictions_original < 0.5, 0, predictions_std)
 rmse = root_mean_squared_error(predictions_original.flatten(), test_Y.flatten())    
 print("RMSE: ", rmse)
 
 # Visualization
+viz_prediction(test_Y, np.dstack((predictions_original, predictions_std)), is_in_latent_space=False)
 gt_hmax, gt_mean, gt_std = reconstruct_output_image(test_Y, test_rows, test_cols, valid_cols)
 pred_hmax, pred_mean, pred_std = reconstruct_output_image(predictions_original, test_rows, test_cols, valid_cols)
 viz_output_image(hill_path, gt_mean, gt_std, pred_mean, pred_std)

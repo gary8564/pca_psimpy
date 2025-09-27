@@ -172,18 +172,23 @@ class PCAPPGaSP:
         
         # Apply input PCA if specified
         if self.input_dim_reducer is not None:
+            start_time = time.time()
             train_X = self.input_dim_reducer.fit_transform(design)
+            input_pca_time = (time.time() - start_time)
             # Verify reduced dimensions
             assert train_X.shape[1] == self.input_dim_reducer.reducer.n_components, \
                 f"Input PCA reduced to {train_X.shape[1]} components, but expected {self.input_dim_reducer.reducer.n_components}"
         else:
+            input_pca_time = 0
             train_X = design.copy()
         # Verify initialized ndim parameters for emulator
         assert train_X.shape[1] == self.ndim, \
             f"Input dimension of train data is {train_X.shape[1]}, but expected dimension of the defined emulator is {self.ndim}"
         # Apply output PCA if specified
         if self.output_dim_reducer is not None:
+            start_time = time.time()
             train_Y = self.output_dim_reducer.fit_transform(response)
+            output_pca_time = (time.time() - start_time)
             # Verify reduced dimensions
             assert train_Y.shape[1] == self.output_dim_reducer.reducer.n_components, \
                 f"Output PCA reduced to {train_Y.shape[1]} components, expected {self.output_dim_reducer.reducer.n_components}"
@@ -191,11 +196,13 @@ class PCAPPGaSP:
             self.latent_train_min = np.min(train_Y, axis=0)
             self.latent_train_max = np.max(train_Y, axis=0)
         else:
+            output_pca_time = 0
             train_Y = response.copy()
         # Train the emulator
         start_time = time.time()
         self.emulator.train(train_X, train_Y, trend)
-        training_time = (time.time() - start_time)
+        gp_training_time = (time.time() - start_time)
+        training_time = input_pca_time + output_pca_time + gp_training_time
         print(f"Training PCAPPGaSP takes {training_time:.3f} s")
         return training_time
         
@@ -242,11 +249,12 @@ class PCAPPGaSP:
             # Get predictions
             start_time = time.time()
             predictions_latent = self.emulator.predict(testing_input=test_X, testing_trend=testing_trend)
-            infer_time = (time.time() - start_time)
-            print(f"Inference PCAPPGaSP takes {infer_time:.3f} s")
 
             # Post-process predictions
             predictions_mean_orig, lower_CI, upper_CI, std_orig = self._postprocess_testing_output(predictions_latent, uncertainty_reconstruction)            
+            infer_time = (time.time() - start_time)
+            print(f"Inference PCAPPGaSP takes {infer_time:.3f} s")
+            
             if lower_CI is not None and upper_CI is not None and std_orig is not None:
                 predictive_uncertainties = np.dstack([lower_CI, upper_CI, std_orig])
             else:
